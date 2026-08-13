@@ -16,7 +16,17 @@ export async function GET(
     const pathname = `cards/${filename}`;
     const token = process.env.BLOB_READ_WRITE_TOKEN;
 
-    const result = await get(pathname, { token, access: "private" });
+    let result = null;
+    try {
+      result = await get(pathname, { token, access: "private" });
+    } catch {
+      try {
+        result = await get(pathname, { token, access: "public" });
+      } catch (err) {
+        console.error("[image-route] Blob get error:", err);
+      }
+    }
+
     if (!result || !result.stream) {
       return new NextResponse("Card image not found", { status: 404 });
     }

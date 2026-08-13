@@ -33,27 +33,45 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const imageUrl = getImageUrl(id);
   const canonicalUrl = `${getBaseUrl()}/card/${id}`;
 
+  // Extract builder name from ID 
+  const rawName = decodeURIComponent(id)
+    .replace(/^cards\//, "")
+    .replace(/\.png$/, "")
+    .split("-")
+    .slice(0, -1)
+    .join(" ");
+
+  const displayName = rawName
+    ? rawName
+        .split(" ")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ")
+    : "Builder";
+
+  const title = `${displayName} — HH Goa 2026 Builder ID`;
+  const description = `HH Goa 2026 Builder ID for ${displayName}. Built in Goa for the world. #FrameInGoa`;
+
   return {
-    title: "HH Goa 2026 Builder ID Card",
-    description: "Check out my HH Goa 2026 Builder ID Card! #FrameInGoa",
+    title,
+    description,
     openGraph: {
-      title: "HH Goa 2026 Builder ID Card",
-      description: "Check out my HH Goa 2026 Builder ID Card! #FrameInGoa",
+      title,
+      description,
       url: canonicalUrl,
       images: [
         {
           url: imageUrl,
           width: 1200,
-          height: 630,
-          alt: "HH Goa 2026 Builder ID Card",
+          height: 857,
+          alt: `HH Goa 2026 Builder ID — ${displayName}`,
         },
       ],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: "HH Goa 2026 Builder ID Card",
-      description: "Check out my HH Goa 2026 Builder ID Card! #FrameInGoa",
+      title,
+      description,
       images: [imageUrl],
     },
   };
