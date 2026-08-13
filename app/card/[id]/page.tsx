@@ -1,40 +1,23 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { buildXIntent } from "@/lib/share";
 import { getBaseUrl } from "@/lib/url";
-import { getCardBlobUrl } from "@/lib/blob";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-async function resolveImageUrl(id: string): Promise<string> {
-  if (id.startsWith("http://") || id.startsWith("https://") || id.startsWith("data:")) {
-    return id;
-  }
-  try {
-    const decoded = atob(decodeURIComponent(id));
-    if (decoded.startsWith("http://") || decoded.startsWith("https://") || decoded.startsWith("data:")) {
-      return decoded;
-    }
-  } catch {}
-
-  const blobUrl = await getCardBlobUrl(id);
-  if (blobUrl) {
-    return blobUrl;
-  }
-
-  return `${getBaseUrl()}/api/cards/${id}/image`;
+function getCardImageUrl(id: string): string {
+  const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.png$/, "");
+  return `${getBaseUrl()}/api/cards/${cleanId}/image`;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const imageUrl = await resolveImageUrl(id);
-  const canonicalUrl = `${getBaseUrl()}/card/${id}`;
+  const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.png$/, "");
+  const imageUrl = getCardImageUrl(cleanId);
+  const canonicalUrl = `${getBaseUrl()}/card/${cleanId}`;
 
-  const rawName = decodeURIComponent(id)
-    .replace(/^cards\//, "")
-    .replace(/\.png$/, "")
+  const rawName = cleanId
     .split("-")
     .slice(0, -1)
     .join(" ");
@@ -77,55 +60,53 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CardPage({ params }: Props) {
   const { id } = await params;
-  const imageUrl = await resolveImageUrl(id);
-  const cardPageUrl = `${getBaseUrl()}/card/${id}`;
+  const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.png$/, "");
+  const imageUrl = getCardImageUrl(cleanId);
+  const cardPageUrl = `${getBaseUrl()}/card/${cleanId}`;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-margin-mobile py-12 gap-8">
-      <h1 className="font-display text-display-lg-mobile md:text-display-lg text-primary text-center">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 md:px-8 py-12 gap-8">
+      <h1 className="font-display text-3xl md:text-4xl font-black uppercase text-primary text-center">
         HH Goa 2026 Builder ID
       </h1>
 
       <div
-        className="w-full max-w-xl card-ambient-shadow rounded-2xl overflow-hidden bg-paper-white"
+        className="w-full max-w-2xl card-ambient-shadow rounded-2xl overflow-hidden bg-paper-white shadow-xl"
         style={{ border: "10px solid #003527" }}
       >
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={imageUrl}
           alt="HH Goa 2026 Builder ID Card"
-          width={1200}
-          height={900}
-          className="w-full h-auto"
-          priority
-          unoptimized
+          className="w-full h-auto object-cover block"
         />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
         <a
           href={imageUrl}
-          download="hh-goa-builder-id.png"
-          className="flex-1 bg-primary text-on-primary font-body text-button-text py-3 rounded-full btn-shadow hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 text-center"
+          download={`hh-goa-builder-id-${cleanId}.png`}
+          className="flex-1 bg-primary text-on-primary font-body font-bold py-3 rounded-full btn-shadow hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 text-center text-sm cursor-pointer"
         >
-          <span className="material-symbols-outlined">download</span>
-          Download
+          <span className="material-symbols-outlined text-lg">download</span>
+          Download PNG
         </a>
         <a
           href={buildXIntent(cardPageUrl)}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 bg-secondary text-on-secondary font-body text-button-text py-3 rounded-full btn-shadow-secondary hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 text-center"
+          className="flex-1 bg-[#E94F72] text-white font-body font-bold py-3 rounded-full hover:bg-[#d83a64] hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 text-center text-sm shadow-sm"
         >
-          <span className="material-symbols-outlined">share</span>
+          <span className="material-symbols-outlined text-lg">share</span>
           Share on X
         </a>
       </div>
 
       <a
         href="/"
-        className="font-label text-label-caps text-outline uppercase tracking-widest hover:text-primary transition-colors text-xs"
+        className="font-label text-[11px] font-bold text-outline uppercase tracking-widest hover:text-primary transition-colors mt-2"
       >
-        ← Create your own
+        ← Create your own Builder ID
       </a>
     </div>
   );

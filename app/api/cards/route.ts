@@ -3,6 +3,8 @@ import { cardUploadSchema } from "@/lib/validation";
 import { uploadCard } from "@/lib/blob";
 import { getBaseUrl } from "@/lib/url";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -12,9 +14,9 @@ export async function POST(req: Request) {
     }
     const { imageDataUrl, name } = parsed.data;
 
-    // Sanitize name for filename: strip non-alphanumeric, lowercase
+    // Use client-provided ID if available to ensure synchronization, or generate new ID
     const safeName = name.toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 40) || "builder";
-    const id = `${safeName}-${Date.now()}`;
+    const id = body.id || `${safeName}-${Date.now()}`;
 
     let uploadResult: { url: string; pathname: string } | null = null;
     try {
@@ -24,7 +26,7 @@ export async function POST(req: Request) {
     }
 
     const baseUrl = getBaseUrl();
-    const publicImageUrl = uploadResult?.url || `${baseUrl}/api/cards/${id}/image`;
+    const publicImageUrl = `${baseUrl}/api/cards/${id}/image`;
     const publicCardUrl = `${baseUrl}/card/${id}`;
 
     return NextResponse.json({

@@ -78,24 +78,24 @@ export default function GeneratorForm() {
       // 1. Export card as PNG data URL (client-side)
       const dataUrl = await exportCard(cardRef.current);
 
-      // 2. Generate local unique fallback ID to guarantee an ID exists
+      // 2. Generate unique ID for this card
       const safeName = (name || "builder").toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 40);
       const uniqueId = `${safeName}-${Date.now()}`;
 
       let finalCardId = uniqueId;
       let finalImageUrl = dataUrl;
 
-      // 3. Upload to storage
+      // 3. Upload to Vercel Blob via API
       try {
         const res = await fetch("/api/cards", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageDataUrl: dataUrl, name }),
+          body: JSON.stringify({ imageDataUrl: dataUrl, name, id: uniqueId }),
         });
         const data = await res.json();
         if (res.ok && data.id) {
           finalCardId = data.id;
-          finalImageUrl = data.imageUrl || data.url || dataUrl;
+          finalImageUrl = data.imageUrl || `${getBaseUrl()}/api/cards/${data.id}/image`;
         }
       } catch (uploadErr) {
         console.warn("[generate] Blob upload note:", uploadErr);
