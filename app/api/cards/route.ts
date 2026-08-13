@@ -16,23 +16,28 @@ export async function POST(req: Request) {
     const safeName = name.toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 40) || "builder";
     const id = `${safeName}-${Date.now()}`;
 
-    const { url, pathname } = await uploadCard(imageDataUrl, id);
+    let uploadResult: { url: string; pathname: string } | null = null;
+    try {
+      uploadResult = await uploadCard(imageDataUrl, id);
+    } catch (blobError) {
+      console.warn("[cards] Storage not configured or upload failed:", blobError);
+    }
 
     const baseUrl = getBaseUrl();
-    const publicImageUrl = `${baseUrl}/api/cards/${id}/image`;
-    const publicCardUrl = `${baseUrl}/card/${id}`;
+    const publicImageUrl = uploadResult ? `${baseUrl}/api/cards/${id}/image` : "";
+    const publicCardUrl = uploadResult ? `${baseUrl}/card/${id}` : baseUrl;
 
     return NextResponse.json({
-      id,
-      pathname,
-      blobUrl: url,
+      id: uploadResult ? id : "",
+      pathname: uploadResult?.pathname || "",
+      blobUrl: uploadResult?.url || "",
       imageUrl: publicImageUrl,
       url: publicImageUrl,
       publicUrl: publicCardUrl,
     });
   } catch (e) {
     console.error("[cards]", e);
-    const msg = e instanceof Error ? e.message : "Card upload failed";
+    const msg = e instanceof Error ? e.message : "Card generation failed";
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

@@ -76,20 +76,25 @@ export default function GeneratorForm() {
     setStep("generating-card");
 
     try {
-      // Export card as PNG data URL (client-side html-to-image)
+      // 1. Export card as PNG data URL (client-side)
       const dataUrl = await exportCard(cardRef.current);
 
-      // Upload to Vercel Blob via API
-      const res = await fetch("/api/cards", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageDataUrl: dataUrl, name }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload failed");
-      
-      setCardId(data.id);
-      setCardUrl(data.url);
+      // 2. Upload to storage if configured (non-blocking)
+      try {
+        const res = await fetch("/api/cards", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageDataUrl: dataUrl, name }),
+        });
+        const data = await res.json();
+        if (res.ok && data.id) {
+          setCardId(data.id);
+          setCardUrl(data.url);
+        }
+      } catch (uploadErr) {
+        console.warn("[generate] Blob upload skipped/unavailable:", uploadErr);
+      }
+
       setStep("done");
     } catch (e) {
       console.error("[generate] Error:", (e as Error).message);
