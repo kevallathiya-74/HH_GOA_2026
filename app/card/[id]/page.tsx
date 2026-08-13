@@ -2,38 +2,36 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { buildXIntent } from "@/lib/share";
 import { getBaseUrl } from "@/lib/url";
+import { getCardBlobUrl } from "@/lib/blob";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-// Decode blob URL from base64 id param
-function decodeId(id: string): string {
+async function resolveImageUrl(id: string): Promise<string> {
+  if (id.startsWith("http://") || id.startsWith("https://") || id.startsWith("data:")) {
+    return id;
+  }
   try {
     const decoded = atob(decodeURIComponent(id));
     if (decoded.startsWith("http://") || decoded.startsWith("https://") || decoded.startsWith("data:")) {
       return decoded;
     }
-    return decodeURIComponent(id);
-  } catch {
-    return decodeURIComponent(id);
-  }
-}
+  } catch {}
 
-function getImageUrl(id: string): string {
-  const decoded = decodeId(id);
-  if (decoded.startsWith("http://") || decoded.startsWith("https://") || decoded.startsWith("data:")) {
-    return decoded;
+  const blobUrl = await getCardBlobUrl(id);
+  if (blobUrl) {
+    return blobUrl;
   }
+
   return `${getBaseUrl()}/api/cards/${id}/image`;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const imageUrl = getImageUrl(id);
+  const imageUrl = await resolveImageUrl(id);
   const canonicalUrl = `${getBaseUrl()}/card/${id}`;
 
-  // Extract builder name from ID 
   const rawName = decodeURIComponent(id)
     .replace(/^cards\//, "")
     .replace(/\.png$/, "")
@@ -79,7 +77,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CardPage({ params }: Props) {
   const { id } = await params;
-  const imageUrl = getImageUrl(id);
+  const imageUrl = await resolveImageUrl(id);
   const cardPageUrl = `${getBaseUrl()}/card/${id}`;
 
   return (

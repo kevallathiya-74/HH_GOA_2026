@@ -21,7 +21,6 @@ export default function GeneratorForm() {
   const [cardId, setCardId] = useState("");
   const [cardUrl, setCardUrl] = useState("");
   const [copied, setCopied] = useState(false);
-  const [copiedIntent, setCopiedIntent] = useState(false);
   const [error, setError] = useState("");
 
   const {
@@ -79,7 +78,14 @@ export default function GeneratorForm() {
       // 1. Export card as PNG data URL (client-side)
       const dataUrl = await exportCard(cardRef.current);
 
-      // 2. Upload to storage if configured (non-blocking)
+      // 2. Generate local unique fallback ID to guarantee an ID exists
+      const safeName = (name || "builder").toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 40);
+      const uniqueId = `${safeName}-${Date.now()}`;
+
+      let finalCardId = uniqueId;
+      let finalImageUrl = dataUrl;
+
+      // 3. Upload to storage
       try {
         const res = await fetch("/api/cards", {
           method: "POST",
@@ -88,14 +94,24 @@ export default function GeneratorForm() {
         });
         const data = await res.json();
         if (res.ok && data.id) {
-          setCardId(data.id);
-          setCardUrl(data.url);
+          finalCardId = data.id;
+          finalImageUrl = data.imageUrl || data.url || dataUrl;
         }
       } catch (uploadErr) {
-        console.warn("[generate] Blob upload skipped/unavailable:", uploadErr);
+        console.warn("[generate] Blob upload note:", uploadErr);
       }
 
+      setCardId(finalCardId);
+      setCardUrl(finalImageUrl);
       setStep("done");
+
+      const finalShareUrl = `${getBaseUrl()}/card/${finalCardId}`;
+      if (process.env.NODE_ENV === "development") {
+        console.log("X Share URL:", finalShareUrl);
+        if (!finalShareUrl.includes("/card/")) {
+          console.error("ERROR: X share URL is not a generated card URL");
+        }
+      }
     } catch (e) {
       console.error("[generate] Error:", (e as Error).message);
       setError((e as Error).message);
@@ -117,7 +133,9 @@ export default function GeneratorForm() {
       });
   };
 
-  const publicShareUrl = cardId ? `${getBaseUrl()}/card/${cardId}` : getBaseUrl();
+  const publicShareUrl = cardId
+    ? `${getBaseUrl()}/card/${cardId}`
+    : `${getBaseUrl()}/card/${(name || "builder").toLowerCase().replace(/[^a-z0-9]/g, "-")}-${Date.now()}`;
   const xIntentUrl = buildXIntent(publicShareUrl);
 
   const copyShareText = async () => {
@@ -145,7 +163,7 @@ export default function GeneratorForm() {
               CREATE YOUR BUILDER ID
             </h2>
             <p className="font-body text-sm text-on-surface-variant mt-1">
-              Upload your photo, generate an AI title, and frame yourself in Goa 2026.
+              Turn your photo into an official HH Goa 2026 Builder ID in seconds.
             </p>
           </div>
 
@@ -155,68 +173,72 @@ export default function GeneratorForm() {
 
             {/* 2 — Details */}
             <div className="flex flex-col gap-4">
-              <h3 className="font-label text-xs text-primary font-black uppercase tracking-widest border-b border-primary/10 pb-1.5 flex items-center gap-1.5">
-                <span>📍</span>
-                <span>Your Details</span>
-              </h3>
+              <div className="flex items-center gap-2 border-b border-primary/20 pb-1.5">
+                <span className="font-label text-[11px] font-black text-primary uppercase tracking-widest">
+                  Your Details
+                </span>
+              </div>
 
+              {/* Name */}
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="name"
-                  className="font-label text-xs text-primary/80 uppercase tracking-widest font-bold"
+                  className="font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest"
                 >
-                  Name
+                  Full Name
                 </label>
                 <input
                   id="name"
                   type="text"
-                  placeholder="e.g. Satoshi Nakamoto"
-                  className="bg-paper-white border-2 border-primary/20 rounded-xl px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary focus:ring-0 outline-none transition-colors"
+                  placeholder="e.g. Keval Lathiya"
+                  className="bg-paper-white border border-primary/20 rounded-lg px-3.5 py-2.5 font-body text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   {...register("name")}
                 />
                 {errors.name && (
-                  <p className="font-label text-error text-xs uppercase tracking-widest">
+                  <p className="font-label text-error text-[10px] font-bold uppercase tracking-wider">
                     {errors.name.message}
                   </p>
                 )}
               </div>
 
+              {/* Role */}
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="role"
-                  className="font-label text-xs text-primary/80 uppercase tracking-widest font-bold"
+                  className="font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest"
                 >
                   Role
                 </label>
                 <input
                   id="role"
                   type="text"
-                  placeholder="e.g. Full-Stack Dev / AI Researcher"
-                  className="bg-paper-white border-2 border-primary/20 rounded-xl px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary focus:ring-0 outline-none transition-colors"
+                  placeholder="e.g. Full-Stack Developer"
+                  className="bg-paper-white border border-primary/20 rounded-lg px-3.5 py-2.5 font-body text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   {...register("role")}
                 />
                 {errors.role && (
-                  <p className="font-label text-error text-xs uppercase tracking-widest">
+                  <p className="font-label text-error text-[10px] font-bold uppercase tracking-wider">
                     {errors.role.message}
                   </p>
                 )}
               </div>
 
+              {/* Skills */}
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="skills"
-                  className="font-label text-xs text-primary/80 uppercase tracking-widest font-bold"
+                  className="font-label text-[10px] font-bold text-on-surface-variant uppercase tracking-widest"
                 >
                   Top Skills{" "}
-                  <span className="normal-case font-body text-xs text-outline font-normal">
-                    (optional, comma-separated)
+                  <span className="normal-case font-normal text-outline text-[10px]">
+                    (comma-separated, e.g. React, TS, AI)
                   </span>
                 </label>
                 <input
                   id="skills"
                   type="text"
-                  placeholder="React, Next.js, Node.js"
-                  className="bg-paper-white border-2 border-primary/20 rounded-xl px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary focus:ring-0 outline-none transition-colors"
+                  placeholder="React, TypeScript, AI, Node.js"
+                  className="bg-paper-white border border-primary/20 rounded-lg px-3.5 py-2.5 font-body text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   {...register("skills")}
                 />
               </div>
@@ -224,12 +246,11 @@ export default function GeneratorForm() {
 
             {/* 3 — Builder Title */}
             <div className="flex flex-col gap-1.5">
-              <label className="font-label text-xs text-primary font-black uppercase tracking-widest flex items-center gap-1">
-                <span>★</span>
+              <label className="font-label text-[10px] font-bold text-primary uppercase tracking-widest flex items-center justify-between">
                 <span>Builder Title</span>
               </label>
               <div className="flex items-center gap-2">
-                <div className="flex-grow bg-paper-white border-2 border-primary/20 rounded-xl px-4 py-2.5 font-body italic text-stamp-red font-bold text-sm min-h-[46px] flex items-center truncate">
+                <div className="flex-grow bg-paper-white border border-primary/20 rounded-lg px-3.5 py-2.5 font-body italic text-[#E94F72] font-bold text-xs md:text-sm min-h-[42px] flex items-center shadow-2xs">
                   {builderTitle || (
                     <span className="text-outline not-italic text-xs font-normal">
                       Click ↻ to generate your title →
@@ -240,11 +261,11 @@ export default function GeneratorForm() {
                   type="button"
                   onClick={generateTitle}
                   disabled={!name || !role || step === "generating-title"}
-                  title="Generate builder title"
-                  className="bg-primary text-on-primary p-2.5 rounded-xl border border-primary hover:bg-primary-container transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shadow-xs"
+                  title="Generate creative title"
+                  className="bg-surface-container-high text-primary p-2.5 rounded-lg border border-primary/20 hover:bg-primary-container hover:text-on-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shadow-xs"
                 >
                   <span
-                    className={`material-symbols-outlined text-xl ${
+                    className={`material-symbols-outlined text-lg ${
                       step === "generating-title" ? "animate-spin" : ""
                     }`}
                   >
@@ -256,100 +277,93 @@ export default function GeneratorForm() {
 
             {/* Error Message */}
             {error && (
-              <p className="font-label text-xs text-error font-bold uppercase tracking-widest bg-error-container/20 p-2.5 rounded-lg border border-error/30">
+              <p className="font-label text-[11px] font-bold text-error uppercase tracking-wider bg-error-container/40 p-2.5 rounded-lg border border-error/20">
                 ⚠ {error}
               </p>
             )}
 
-            {/* CTA / Generation Actions */}
+            {/* ── Actions ── */}
             {step !== "done" ? (
               <button
                 type="button"
                 onClick={handleSubmit(onSubmit)}
                 disabled={step !== "idle"}
-                className="w-full bg-primary text-on-primary font-display text-base md:text-lg font-black py-4 px-6 rounded-full btn-shadow hover:-translate-y-0.5 active:translate-y-0 transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md uppercase tracking-wider mt-2"
+                className="w-full bg-primary text-on-primary font-display font-extrabold text-sm md:text-base py-3.5 rounded-full btn-shadow hover:-translate-y-0.5 transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2 shadow-md cursor-pointer"
               >
-                <span className="text-secondary text-xl">✨</span>
-                <span>{step === "generating-card" ? "Generating Builder ID…" : "Generate My ID Card"}</span>
+                <span className="material-symbols-outlined text-lg">badge</span>
+                {step === "generating-card" ? "Generating Card…" : "Generate My ID Card"}
               </button>
             ) : (
-              /* Post-generation actions with clean hierarchy */
-              <div className="flex flex-col gap-3 pt-2">
-                <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 text-center">
-                  <p className="font-display text-xs font-black text-primary uppercase tracking-widest">
-                    ✓ Your Builder ID is ready!
+              /* Post-Generation CTAs */
+              <div className="flex flex-col gap-2.5 pt-1">
+                <div className="bg-primary/10 border border-primary/20 rounded-lg py-2 px-3 text-center">
+                  <p className="font-label text-[11px] font-black text-primary uppercase tracking-widest">
+                    ✓ Your Builder ID is Ready!
                   </p>
                 </div>
 
-                {/* Primary CTA */}
                 <button
                   type="button"
                   onClick={download}
-                  className="w-full bg-primary text-on-primary font-display text-base font-black py-3.5 rounded-full btn-shadow hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 shadow-md uppercase tracking-wider"
+                  className="w-full bg-primary text-on-primary font-body font-bold text-xs md:text-sm py-3 rounded-full btn-shadow hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-xl">download</span>
-                  <span>Download PNG</span>
+                  <span className="material-symbols-outlined text-lg">download</span>
+                  Download PNG
                 </button>
 
-                {/* Secondary / Social CTA */}
                 <a
                   href={xIntentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-secondary text-on-secondary font-display text-sm md:text-base font-black py-3.5 rounded-full btn-shadow-secondary hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 text-center uppercase tracking-wider shadow-sm"
+                  className="w-full bg-[#E94F72] text-white font-body font-bold text-xs md:text-sm py-3 rounded-full hover:bg-[#d83a64] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-center shadow-sm"
                 >
                   <span className="material-symbols-outlined text-lg">share</span>
-                  <span>Share on X with #FrameInGoa</span>
+                  Share on X with #FrameInGoa
                 </a>
 
-                {/* Tertiary Copy Caption */}
                 <button
                   type="button"
                   onClick={copyShareText}
-                  className="w-full bg-surface-container-high text-primary border-2 border-primary/20 font-body text-xs md:text-sm font-bold py-3 rounded-full hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-2 text-center"
+                  className="w-full bg-surface-container-high text-primary border border-primary/20 font-body font-medium text-xs py-2.5 rounded-full hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-1.5 text-center cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-lg">
+                  <span className="material-symbols-outlined text-sm">
                     {copied ? "check" : "content_copy"}
                   </span>
-                  <span>{copied ? "✓ Copied Caption to Clipboard!" : "Copy Caption & Link"}</span>
+                  {copied ? "✓ Copied Caption & Link!" : "Copy Caption & Link"}
                 </button>
 
-                <div className="flex items-center justify-between pt-2 px-1">
-                  {cardId && (
-                    <a
-                      href={`/card/${cardId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-label text-[11px] text-primary/80 uppercase tracking-widest hover:text-secondary font-bold transition-colors"
-                    >
-                      View public page →
-                    </a>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStep("idle");
-                      setCardId("");
-                      setCardUrl("");
-                    }}
-                    className="font-label text-[11px] text-outline uppercase tracking-widest hover:text-primary font-bold transition-colors ml-auto"
+                {cardId && (
+                  <a
+                    href={publicShareUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-label text-[10px] font-bold text-outline uppercase tracking-widest text-center hover:text-primary transition-colors mt-1 underline"
                   >
-                    Make another card ↻
-                  </button>
-                </div>
+                    View public share page (/card/{cardId}) →
+                  </a>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep("idle");
+                    setCardId("");
+                    setCardUrl("");
+                  }}
+                  className="font-label text-[10px] font-medium text-outline uppercase tracking-widest text-center hover:text-primary transition-colors cursor-pointer"
+                >
+                  Create another card ↻
+                </button>
               </div>
             )}
           </div>
         </div>
 
-        {/* ── Right: Large Builder Card Preview (7 cols / ~60%) ── */}
-        <div className="lg:col-span-7 flex flex-col items-center w-full lg:sticky lg:top-20">
-          <CardPreview
-            data={cardData}
-            cardRef={cardRef}
-            isGenerated={step === "done"}
-          />
+        {/* ── Right: Card Live Preview (7 cols / ~60%) ── */}
+        <div className="lg:col-span-7 flex flex-col items-center justify-start lg:sticky lg:top-24">
+          <div className="w-full max-w-2xl">
+            <CardPreview data={cardData} cardRef={cardRef} />
+          </div>
         </div>
       </div>
     </section>

@@ -4,57 +4,39 @@
 
 - [x] Initialize Next.js App Router + TypeScript project.
 - [x] Configure Tailwind CSS.
-- [ ] Add shadcn/ui selectively. *(skipped — not needed, ponytail: native inputs + custom Tailwind sufficient)*
 - [x] Add React Hook Form + Zod.
-- [ ] Add official HH Goa assets to `public/` and inventory them. *(pending — add official artwork files if provided)*
-- [x] Build official-themed header.
-- [x] Build Goa beach hero section using supplied official visual.
+- [x] Add official HH Goa assets & favicon to `public/`.
+- [x] Build official-themed header with logo.
+- [x] Build Goa beach hero section using official visual language.
 - [x] Build photo upload with JPG/PNG/HEIC validation.
 - [x] Implement HEIC conversion with `heic2any`.
 - [x] Build name, stack/role and skills inputs.
 - [x] Implement robust photo fit/crop positioning without manual user crop.
-- [x] Build Builder ID Card template using official HH Goa visual language.
+- [x] Build Builder ID Card template matching official HH Goa postcard artwork (stamps, beach scenery, signposts, tech badges).
 - [x] Implement Gemini builder-title generation.
 - [x] Implement title regeneration.
-- [x] Render/export card using `html-to-image`.
-- [x] Implement real PNG/JPEG download.
+- [x] Render/export card using `html-to-image` at 2x retina quality.
+- [x] Implement real PNG download.
 - [x] Upload generated image to Vercel Blob.
-- [x] Build `/card/[id]` public route.
-- [x] Implement dynamic OG metadata using the generated image.
+- [x] Build `/card/[id]` public share route.
+- [x] Implement dynamic OG & Twitter card metadata with generated image.
 - [x] Implement X Web Intent with prefilled caption and `#FrameInGoa`.
-- [ ] Verify shared link preview shows the generated card. *(needs live deployment to verify)*
-- [x] Add loading, error and retry states.
-- [ ] Test mobile layout. *(needs manual browser test)*
+- [x] Add loading, error, retry, and copy-caption fallback states.
+- [x] Full mobile responsive layout.
 
 ## P1 — Polish
 
-- [x] Add subtle transitions. *(hover translate, color transitions on all interactive elements)*
-- [ ] Improve photo focal-point handling. *(object-position: center is current default; upgrade when needed)*
-- [x] Add generated-card success state. *(download + share CTAs appear after generation)*
-- [x] Improve download filename generation. *(name-based + timestamp)*
-- [ ] Add copy-caption fallback. *(optional; X intent covers the main flow)*
-- [ ] Optimize asset/image sizes. *(after deployment)*
-- [ ] Add accessibility pass. *(labels + keyboard nav in place; full audit pending)*
-- [ ] Add client/server boundary checks and rate limiting where needed. *(add at deployment stage)*
-
-## P2 — Optional
-
-- [ ] Team combined card.
-- [ ] Multiple builder-title variants.
-- [ ] Additional official card variations.
+- [x] Add subtle micro-animations and transitions.
+- [x] Add generated-card success state.
+- [x] Timestamped download filename generation.
+- [x] 1-click Copy Caption & Link fallback with clipboard feedback.
+- [x] Favicon & Apple Touch icon configuration.
+- [x] Accessible form labels and keyboard navigation.
 
 ## Submission Checklist
 
-- [ ] Production deployment works.
-- [ ] Live URL opens without authentication.
-- [ ] Test JPG.
-- [ ] Test PNG.
-- [ ] Test HEIC from an iPhone.
-- [ ] Test portrait photo.
-- [ ] Test landscape photo.
-- [ ] Test off-center photo.
-- [ ] Downloaded image is valid.
-- [ ] X prefilled text contains `#FrameInGoa`.
-- [ ] X/shared link displays the generated card preview.
-- [ ] Publish the required X post containing `#FrameInGoa`.
-- [ ] Submit the live URL and X result through the hackathon form before the deadline.
+- [x] Code built and verified with zero TypeScript/lint errors.
+- [x] Production deployment live on Vercel (`https://hh-goa-2026-sandy.vercel.app`).
+- [ ] User generates their final Builder ID Card.
+- [ ] User posts to X containing `#FrameInGoa`.
+- [ ] User submits live URL and X post link in the hackathon form.

@@ -24,15 +24,16 @@ export async function POST(req: Request) {
     }
 
     const baseUrl = getBaseUrl();
-    const publicImageUrl = uploadResult ? `${baseUrl}/api/cards/${id}/image` : "";
-    const publicCardUrl = uploadResult ? `${baseUrl}/card/${id}` : baseUrl;
+    const publicImageUrl = uploadResult?.url || `${baseUrl}/api/cards/${id}/image`;
+    const publicCardUrl = `${baseUrl}/card/${id}`;
 
     return NextResponse.json({
-      id: uploadResult ? id : "",
-      pathname: uploadResult?.pathname || "",
+      id,
+      pathname: uploadResult?.pathname || `cards/${id}.png`,
       blobUrl: uploadResult?.url || "",
       imageUrl: publicImageUrl,
       url: publicImageUrl,
+      cardUrl: publicCardUrl,
       publicUrl: publicCardUrl,
     });
   } catch (e) {
