@@ -11,7 +11,7 @@ interface Props {
 function decodeId(id: string): string {
   try {
     const decoded = atob(decodeURIComponent(id));
-    if (decoded.startsWith("http") || decoded.startsWith("data:")) {
+    if (decoded.startsWith("http://") || decoded.startsWith("https://") || decoded.startsWith("data:")) {
       return decoded;
     }
     return decodeURIComponent(id);
@@ -20,9 +20,17 @@ function decodeId(id: string): string {
   }
 }
 
+function getImageUrl(id: string): string {
+  const decoded = decodeId(id);
+  if (decoded.startsWith("http://") || decoded.startsWith("https://") || decoded.startsWith("data:")) {
+    return decoded;
+  }
+  return `${getBaseUrl()}/api/cards/${id}/image`;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const imageUrl = decodeId(id);
+  const imageUrl = getImageUrl(id);
   const canonicalUrl = `${getBaseUrl()}/card/${id}`;
 
   return {
@@ -36,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         {
           url: imageUrl,
           width: 1200,
-          height: 900,
+          height: 630,
           alt: "HH Goa 2026 Builder ID Card",
         },
       ],
@@ -53,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CardPage({ params }: Props) {
   const { id } = await params;
-  const imageUrl = decodeId(id);
+  const imageUrl = getImageUrl(id);
   const cardPageUrl = `${getBaseUrl()}/card/${id}`;
 
   return (

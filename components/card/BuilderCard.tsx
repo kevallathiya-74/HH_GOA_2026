@@ -13,51 +13,201 @@ interface Props {
   cardRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-// Tech icon helper based on skill name
+// Comprehensive real tech stack icon helper
 function renderSkillIcon(skill: string) {
-  const s = skill.toLowerCase();
-  if (s.includes("react")) {
+  const s = skill.toLowerCase().trim();
+
+  // 1. React
+  if (s.includes("react") && !s.includes("native")) {
     return (
-      <svg className="w-5 h-5 text-[#00D8FF]" viewBox="0 0 115 100" fill="currentColor">
+      <svg className="w-4 h-4 text-[#61DAFB]" viewBox="0 0 115 100" fill="currentColor">
         <ellipse cx="57.5" cy="50" rx="10" ry="4.5" fill="currentColor" />
-        <ellipse cx="57.5" cy="50" rx="55" ry="20" fill="none" stroke="currentColor" strokeWidth="4" />
-        <ellipse cx="57.5" cy="50" rx="55" ry="20" fill="none" stroke="currentColor" strokeWidth="4" transform="rotate(60 57.5 50)" />
-        <ellipse cx="57.5" cy="50" rx="55" ry="20" fill="none" stroke="currentColor" strokeWidth="4" transform="rotate(120 57.5 50)" />
+        <ellipse cx="57.5" cy="50" rx="55" ry="20" fill="none" stroke="currentColor" strokeWidth="5" />
+        <ellipse cx="57.5" cy="50" rx="55" ry="20" fill="none" stroke="currentColor" strokeWidth="5" transform="rotate(60 57.5 50)" />
+        <ellipse cx="57.5" cy="50" rx="55" ry="20" fill="none" stroke="currentColor" strokeWidth="5" transform="rotate(120 57.5 50)" />
       </svg>
     );
   }
+
+  // 2. Next.js
+  if (s.includes("next")) {
+    return (
+      <svg className="w-4 h-4 text-black" viewBox="0 0 180 180" fill="currentColor">
+        <circle cx="90" cy="90" r="90" fill="black" />
+        <path d="M149.508 157.438L69.1478 54H54V125.97H66.1136V69.3836L139.999 164.845C143.333 162.614 146.509 160.137 149.508 157.438Z" fill="white" />
+        <rect x="115" y="54" width="12" height="72" fill="white" />
+      </svg>
+    );
+  }
+
+  // 3. TypeScript
+  if (s === "ts" || s.includes("typescript")) {
+    return (
+      <svg className="w-4 h-4 rounded" viewBox="0 0 32 32">
+        <rect width="32" height="32" rx="4" fill="#3178C6" />
+        <text x="6" y="23" fill="white" fontSize="15" fontWeight="bold" fontFamily="sans-serif">TS</text>
+      </svg>
+    );
+  }
+
+  // 4. JavaScript
+  if (s === "js" || s.includes("javascript")) {
+    return (
+      <svg className="w-4 h-4 rounded" viewBox="0 0 32 32">
+        <rect width="32" height="32" rx="4" fill="#F7DF1E" />
+        <text x="8" y="23" fill="#000" fontSize="15" fontWeight="bold" fontFamily="sans-serif">JS</text>
+      </svg>
+    );
+  }
+
+  // 5. Python
+  if (s.includes("python") || s === "py") {
+    return (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <path d="M11.91 0c-3.1 0-5.18.23-5.18 1.48v2.96h5.36v.74H4.37C1.4 5.18 0 6.96 0 10.15c0 3.32 1.63 4.96 4.63 4.96h1.48v-2.07c0-2.3 1.93-4.22 4.22-4.22h5.37V6.66c0-2.4-2.19-4.22-5.79-4.22v-2.44zm-2.07 1.48a.89.89 0 1 1 0 1.78.89.89 0 0 1 0-1.78z" fill="#3776AB"/>
+        <path d="M12.09 24c3.1 0 5.18-.23 5.18-1.48v-2.96h-5.36v-.74h7.72c2.97 0 4.37-1.78 4.37-4.97 0-3.32-1.63-4.96-4.63-4.96h-1.48v2.07c0 2.3-1.93 4.22-4.22 4.22H8.3v2.16c0 2.4 2.19 4.22 5.79 4.22v2.44zm2.07-1.48a.89.89 0 1 1 0-1.78.89.89 0 0 1 0 1.78z" fill="#FFD43B"/>
+      </svg>
+    );
+  }
+
+  // 6. Solana
+  if (s.includes("solana") || s.includes("sol")) {
+    return (
+      <svg className="w-4 h-4" viewBox="0 0 397 311" fill="none">
+        <path d="M64.6 237.9c2.4-2.4 5.7-3.8 9.2-3.8h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1l62.7-62.7z" fill="#00FFA3"/>
+        <path d="M64.6 3.8C67 1.4 70.3 0 73.8 0h317.4c5.8 0 8.7 7 4.6 11.1l-62.7 62.7c-2.4 2.4-5.7 3.8-9.2 3.8H6.5c-5.8 0-8.7-7-4.6-11.1L64.6 3.8z" fill="#00FFA3"/>
+        <path d="M333.1 120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8 0-8.7 7-4.6 11.1l62.7 62.7c2.4 2.4 5.7 3.8 9.2 3.8h317.4c5.8 0 8.7-7 4.6-11.1l-62.7-62.7z" fill="#DC1FFF"/>
+      </svg>
+    );
+  }
+
+  // 7. Node.js
   if (s.includes("node")) {
     return (
-      <svg className="w-5 h-5 text-[#539E43]" viewBox="0 0 24 24" fill="currentColor">
+      <svg className="w-4 h-4 text-[#539E43]" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2L2 7.8v11.4L12 25l10-5.8V7.8L12 2zm-1 16.5h-2v-7h2v7zm4 0h-2v-4.5c0-.8-.3-1.5-1.2-1.5s-1.3.7-1.3 1.5v4.5H9v-7h1.8v1c.5-.7 1.3-1.2 2.3-1.2 1.8 0 2.9 1.1 2.9 3.2v4z"/>
       </svg>
     );
   }
-  if (s.includes("ts") || s.includes("typescript")) {
+
+  // 8. Tailwind
+  if (s.includes("tailwind")) {
     return (
-      <div className="w-5 h-5 bg-[#3178C6] text-white font-bold rounded flex items-center justify-center text-[10px] leading-none">
-        TS
-      </div>
-    );
-  }
-  if (s.includes("ai") || s.includes("ml") || s.includes("python")) {
-    return (
-      <svg className="w-5 h-5 text-[#8A2BE2]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2a4 4 0 0 0-4 4v1a3 3 0 0 0-3 3 3 3 0 0 0 1 2.2V14a3 3 0 0 0 2 2.8V18a4 4 0 0 0 4 4 4 4 0 0 0 4-4v-1.2A3 3 0 0 0 18 14v-1.8A3 3 0 0 0 19 10a3 3 0 0 0-3-3V6a4 4 0 0 0-4-4z" />
-        <path d="M9 10h.01M15 10h.01M9 14h.01M15 14h.01" />
+      <svg className="w-4 h-4 text-[#38BDF8]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.336 6.182 14.975 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.336 13.382 8.975 12 6.001 12z"/>
       </svg>
     );
   }
-  if (s.includes("mongo") || s.includes("db") || s.includes("sql")) {
+
+  // 9. AI / ML / Gemini
+  if (s.includes("ai") || s.includes("ml") || s.includes("gemini") || s.includes("gpt") || s.includes("llm") || s.includes("claude")) {
     return (
-      <svg className="w-5 h-5 text-[#13AA52]" viewBox="0 0 24 24" fill="currentColor">
+      <svg className="w-4 h-4 text-[#9945FF]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2L14.4 8.6L21 11L14.4 13.4L12 20L9.6 13.4L3 11L9.6 8.6L12 2Z" />
+        <circle cx="19" cy="5" r="2" fill="#E94F72" />
+      </svg>
+    );
+  }
+
+  // 10. Rust
+  if (s.includes("rust")) {
+    return (
+      <svg className="w-4 h-4 text-[#CE412B]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 1a11 11 0 1 0 11 11A11 11 0 0 0 12 1zm0 2a9 9 0 1 1-9 9 9 9 0 0 1 9-9zm-3 4v10h2.5v-3.5h1.2l2.3 3.5H18l-2.7-4a3.3 3.3 0 0 0 2.2-3.1C17.5 8.2 16 7 14 7zm2.5 2.2h1.4c.8 0 1.3.4 1.3 1.1s-.5 1.1-1.3 1.1h-1.4z" />
+      </svg>
+    );
+  }
+
+  // 11. PostgreSQL / SQL / Database
+  if (s.includes("postgres") || s.includes("sql") || s.includes("db") || s.includes("prisma")) {
+    return (
+      <svg className="w-4 h-4 text-[#336791]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 4.02 2 6.5s4.48 4.5 10 4.5 10-2.02 10-4.5S17.52 2 12 2zm0 6.5C7.58 8.5 4 7.16 4 6.5S7.58 4.5 12 4.5s8 1.34 8 2-3.58 2-8 2zm8 3.5c-.75.76-2.3 1.4-4.22 1.76l.72 1.74c2.58-.5 4.46-1.46 5.5-2.6V12zm-16 0v.9c1.04 1.14 2.92 2.1 5.5 2.6l.72-1.74C8.3 13.4 6.75 12.76 6 12zm14 4.5c-.75.76-2.3 1.4-4.22 1.76l.72 1.74c2.58-.5 4.46-1.46 5.5-2.6v-.9zm-16 0v.9c1.04 1.14 2.92 2.1 5.5 2.6l.72-1.74C8.3 17.9 6.75 17.26 6 16.5z"/>
+      </svg>
+    );
+  }
+
+  // 12. MongoDB
+  if (s.includes("mongo")) {
+    return (
+      <svg className="w-4 h-4 text-[#13AA52]" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 1.5C8 6 6.5 9.5 6.5 12.5c0 3.5 2.5 6.5 5.5 7.5 3-1 5.5-4 5.5-7.5C17.5 9.5 16 6 12 1.5zm0 17.5c-2.5-.8-4.5-3.2-4.5-6.5 0-2.3 1.2-5.2 4.5-9 3.3 3.8 4.5 6.7 4.5 9 0 3.3-2 5.7-4.5 6.5z"/>
       </svg>
     );
   }
-  // Generic tech chip icon
+
+  // 13. Docker
+  if (s.includes("docker")) {
+    return (
+      <svg className="w-4 h-4 text-[#2496ED]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M13.98 11.08h-2.12v2.13h2.12v-2.13zm-2.65 0H9.2v2.13h2.13v-2.13zm-2.66 0H6.55v2.13h2.12v-2.13zm5.31-2.65h-2.12v2.12h2.12V8.43zm-2.65 0H9.2v2.12h2.13V8.43zm-2.66 0H6.55v2.12h2.12V8.43zm7.97 0h-2.12v2.12h2.12V8.43zm-2.66-2.66h-2.12v2.13h2.12V5.77zm7.69 5.86c-.34-.23-1.1-.34-2.02-.13-.13-.74-.53-1.4-1.12-1.89l-.53-.41-.37.56c-.46.7-.62 1.55-.47 2.37-.47.26-1.2.32-1.85.32H1.54c-.33 0-.6.27-.6.6 0 3.32 1.77 5.77 4.7 6.46 1.05.25 2.21.28 3.42.11 3.23-.46 5.76-2.3 6.94-5.07.72.07 1.48-.05 2.12-.5.14-.1.19-.28.14-.45-.04-.15-.17-.26-.32-.28z"/>
+      </svg>
+    );
+  }
+
+  // 14. Figma
+  if (s.includes("figma") || s.includes("ui/ux") || s.includes("design")) {
+    return (
+      <svg className="w-4 h-4" viewBox="0 0 38 57" fill="none">
+        <path d="M19 28.5C19 23.2533 23.2533 19 28.5 19C33.7467 19 38 23.2533 38 28.5C38 33.7467 33.7467 38 28.5 38C23.2533 38 19 33.7467 19 28.5Z" fill="#1ABCFE"/>
+        <path d="M0 47.5C0 42.2533 4.25329 38 9.5 38H19V47.5C19 52.7467 14.7467 57 9.5 57C4.25329 57 0 52.7467 0 47.5Z" fill="#0ACF83"/>
+        <path d="M19 0V19H28.5C33.7467 19 38 14.7467 38 9.5C38 4.25329 33.7467 0 28.5 0H19Z" fill="#FF7262"/>
+        <path d="M0 9.5C0 14.7467 4.25329 19 9.5 19H19V0H9.5C4.25329 0 0 4.25329 0 9.5Z" fill="#F24E1E"/>
+        <path d="M0 28.5C0 33.7467 4.25329 38 9.5 38H19V19H9.5C4.25329 19 0 23.2533 0 28.5Z" fill="#A259FF"/>
+      </svg>
+    );
+  }
+
+  // 15. Vue
+  if (s.includes("vue")) {
+    return (
+      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <path d="M2 3H6L12 13.5L18 3H22L12 21L2 3Z" fill="#42B883"/>
+        <path d="M6 3H10L12 6.5L14 3H18L12 13.5L6 3Z" fill="#35495E"/>
+      </svg>
+    );
+  }
+
+  // 16. Go / Golang
+  if (s === "go" || s.includes("golang")) {
+    return (
+      <svg className="w-4 h-4 text-[#00ADD8]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M1.9 9.5c0-.1 0-.3.1-.4.2-.6.7-1 1.4-1.2.9-.2 1.9-.3 2.8-.3h.4c.5 0 .9.1 1.3.4.4.3.7.8.8 1.3.1.5.1 1.1 0 1.6-.1.6-.4 1.1-.9 1.4-.4.3-.9.4-1.5.4H5.6c-.6 0-1.1-.1-1.6-.4-.5-.3-.9-.7-1.1-1.3-.2-.5-.3-1-.2-1.5zm11.2-1.9c.5 0 1 .1 1.4.3.4.2.8.6 1 1 .2.5.3 1 .2 1.5 0 .5-.2 1-.5 1.4-.3.4-.7.7-1.2.8-.5.2-1 .2-1.6.2h-.4c-.5 0-1-.1-1.4-.3-.4-.2-.8-.6-1-1-.2-.5-.3-1-.2-1.5 0-.5.2-1 .5-1.4.3-.4.7-.7 1.2-.8.5-.2 1-.2 1.6-.2h.4z"/>
+      </svg>
+    );
+  }
+
+  // 17. Solidity / Web3 / Crypto
+  if (s.includes("solidity") || s.includes("web3") || s.includes("crypto") || s.includes("eth")) {
+    return (
+      <svg className="w-4 h-4 text-[#363636]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0L6 10.5L12 14.5L18 10.5L12 0Z" opacity="0.6"/>
+        <path d="M6 11.5L12 22L18 11.5L12 15.5L6 11.5Z"/>
+      </svg>
+    );
+  }
+
+  // 18. GraphQL
+  if (s.includes("graphql")) {
+    return (
+      <svg className="w-4 h-4 text-[#E10098]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2L2 8v8l10 6 10-6V8l-10-6zm0 2.2L19.8 9 12 13.8 4.2 9 12 4.2zM4 10.5l7 4.3v6.9l-7-4.2v-7zm9 11.2v-6.9l7-4.3v7l-7 4.2z"/>
+      </svg>
+    );
+  }
+
+  // 19. Git / GitHub
+  if (s.includes("git") || s.includes("github")) {
+    return (
+      <svg className="w-4 h-4 text-[#F05032]" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M2.6 10.59L8.38 4.8a2.15 2.15 0 0 1 3.04 0l1.24 1.24-2.82 2.82a1.86 1.86 0 0 0-1.8 1.83 1.86 1.86 0 0 0 .52 1.3l-2.02 2.02a1.86 1.86 0 0 0-1.3-.52c-1.02 0-1.85.83-1.85 1.85 0 1.02.83 1.85 1.85 1.85.99 0 1.8-.78 1.85-1.76l2-2a1.86 1.86 0 0 0 1.26.5c1.02 0 1.85-.83 1.85-1.85 0-.34-.1-.66-.27-.93l2.76-2.76 1.54 1.54a2.15 2.15 0 0 1 0 3.04l-5.78 5.79a2.15 2.15 0 0 1-3.04 0L2.6 13.63a2.15 2.15 0 0 1 0-3.04z"/>
+      </svg>
+    );
+  }
+
+  // Generic fallback tech chip icon
   return (
-    <div className="w-5 h-5 bg-[#003527] text-[#ffe08a] font-mono text-[9px] font-bold rounded flex items-center justify-center">
+    <div className="w-4 h-4 bg-[#003527] text-[#ffe08a] font-mono text-[8.5px] font-black rounded flex items-center justify-center">
       &lt;/&gt;
     </div>
   );
@@ -90,16 +240,16 @@ export default function BuilderCard({ data, cardRef }: Props) {
         style={{ border: "1.5px dashed rgba(0, 53, 39, 0.4)" }}
       />
 
-      {/* ── Top Left Logo & Title ── */}
-      <div className="absolute top-4 left-6 z-20 flex flex-col">
-        <div className="flex items-baseline gap-1">
+      {/* ── Top Left Logo & Title (Moved right to left-9 for clear visibility and no overlap) ── */}
+      <div className="absolute top-3.5 left-9 z-30 flex flex-col">
+        <div className="flex items-baseline gap-1.5">
           <span
             className="font-serif tracking-tight text-[#003527]"
             style={{
               fontSize: "clamp(20px, 3.2vw, 32px)",
               fontWeight: 900,
               fontFamily: "Georgia, 'Times New Roman', serif",
-              letterSpacing: "-0.03em",
+              letterSpacing: "-0.02em",
             }}
           >
             HACKER
@@ -120,15 +270,14 @@ export default function BuilderCard({ data, cardRef }: Props) {
               fontSize: "clamp(20px, 3.2vw, 32px)",
               fontWeight: 900,
               fontFamily: "Georgia, 'Times New Roman', serif",
-              letterSpacing: "-0.03em",
+              letterSpacing: "-0.02em",
             }}
           >
             HOUSE
           </span>
         </div>
-        <div className="flex items-center justify-between text-[#003527] font-mono tracking-widest text-[9px] md:text-[10px] font-bold mt-0.5 opacity-90">
-          <span>BUILD • SHIP • IMPACT</span>
-          <span className="ml-4">GOA 2026</span>
+        <div className="text-[#003527] font-mono tracking-widest text-[9px] md:text-[10px] font-extrabold mt-0.5 opacity-85">
+          BUILD • SHIP • IMPACT
         </div>
       </div>
 
@@ -183,8 +332,8 @@ export default function BuilderCard({ data, cardRef }: Props) {
         </div>
       </div>
 
-      {/* ── Main Layout Body ── */}
-      <div className="relative z-10 w-full h-full flex pt-16 md:pt-18 pb-4 px-6">
+      {/* ── Main Layout Body (pt-[4.75rem] gives clear space below top header) ── */}
+      <div className="relative z-10 w-full h-full flex pt-[4.6rem] md:pt-[4.9rem] pb-4 px-7">
         {/* ── Left Column: Framed Photo & Beach Artwork ── */}
         <div className="relative w-[34%] h-[88%] flex flex-col justify-between">
           {/* User Photo in Double-Green Frame */}
@@ -207,6 +356,17 @@ export default function BuilderCard({ data, cardRef }: Props) {
                 </svg>
               </div>
             )}
+          </div>
+
+          {/* Left Palm Fronds Curving Up (Positioned outside text zone so it never blocks HACKER) */}
+          <div className="absolute top-1 -left-7 w-12 h-24 pointer-events-none z-10 opacity-70">
+            <svg viewBox="0 0 60 120" fill="none">
+              <path d="M4 120 Q 8 60 20 20" stroke="#003527" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M20 20 C10 16 2 24 0 34 C8 28 16 32 20 20 Z" fill="#0B4D3B" />
+              <path d="M20 20 C28 16 38 24 42 34 C32 28 24 32 20 20 Z" fill="#0B4D3B" />
+              <path d="M16 45 C8 42 2 48 0 56 C6 52 12 55 16 45 Z" fill="#003527" />
+              <path d="M12 70 C6 68 0 74 0 82 C5 78 10 80 12 70 Z" fill="#0B4D3B" />
+            </svg>
           </div>
 
           {/* Bottom Left Tropical Beach Scenery Artwork */}
@@ -266,17 +426,6 @@ export default function BuilderCard({ data, cardRef }: Props) {
                 <path d="M88 20 Q 86 6 82 0" stroke="#003527" strokeWidth="1.5" />
                 <path d="M82 0 Q 74 -2 68 2 M82 0 Q 88 -2 94 4" stroke="#0B4D3B" strokeWidth="1.5" />
               </g>
-            </svg>
-          </div>
-
-          {/* Left Palm Fronds Curving Up */}
-          <div className="absolute -top-12 -left-8 w-16 h-36 pointer-events-none z-15">
-            <svg viewBox="0 0 60 120" fill="none">
-              <path d="M4 120 Q 8 60 26 10" stroke="#003527" strokeWidth="3" strokeLinecap="round" />
-              <path d="M26 10 C15 6 4 14 0 24 C10 18 20 22 26 10 Z" fill="#0B4D3B" />
-              <path d="M26 10 C35 6 46 14 50 24 C40 18 30 22 26 10 Z" fill="#0B4D3B" />
-              <path d="M20 35 C10 32 2 40 0 50 C8 44 16 48 20 35 Z" fill="#003527" />
-              <path d="M14 65 C6 62 0 70 0 80 C6 74 12 78 14 65 Z" fill="#0B4D3B" />
             </svg>
           </div>
         </div>

@@ -18,8 +18,10 @@ export default function GeneratorForm() {
   const [photo, setPhoto] = useState("");
   const [builderTitle, setBuilderTitle] = useState("");
   const [step, setStep] = useState<Step>("idle");
+  const [cardId, setCardId] = useState("");
   const [cardUrl, setCardUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [copiedIntent, setCopiedIntent] = useState(false);
   const [error, setError] = useState("");
 
   const {
@@ -86,7 +88,7 @@ export default function GeneratorForm() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload failed");
       
-      console.log("[generate] Card created successfully. Public URL:", data.url);
+      setCardId(data.id);
       setCardUrl(data.url);
       setStep("done");
     } catch (e) {
@@ -110,14 +112,11 @@ export default function GeneratorForm() {
       });
   };
 
-  const getPublicShareUrl = () => {
-    if (!cardUrl) return getBaseUrl();
-    return `${getBaseUrl()}/card/${encodeURIComponent(btoa(cardUrl))}`;
-  };
+  const publicShareUrl = cardId ? `${getBaseUrl()}/card/${cardId}` : getBaseUrl();
+  const xIntentUrl = buildXIntent(publicShareUrl);
 
   const copyShareText = async () => {
-    const shareUrl = getPublicShareUrl();
-    const caption = getShareCaption(shareUrl);
+    const caption = getShareCaption(publicShareUrl);
     try {
       await navigator.clipboard.writeText(caption);
       setCopied(true);
@@ -127,109 +126,108 @@ export default function GeneratorForm() {
     }
   };
 
-  const publicShareUrl = getPublicShareUrl();
-  const xIntentUrl = buildXIntent(publicShareUrl);
-
   return (
     <section
       id="generate"
-      className="w-full px-margin-mobile md:px-margin-desktop py-8 md:py-12 max-w-container-max mx-auto"
+      className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-10"
     >
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter items-start">
-        {/* ── Left: form panel (5 cols) ── */}
-        <div className="md:col-span-5 flex flex-col gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        {/* ── Left: Form Panel (5 cols / ~40%) ── */}
+        <div className="lg:col-span-5 flex flex-col gap-6 bg-[#FBF6EA] border-2 border-primary/20 rounded-2xl p-6 md:p-8 shadow-xs">
           {/* Header */}
-          <div>
-            <h1 className="font-display text-display-lg-mobile md:text-display-lg text-primary mb-2">
+          <div className="border-b-2 border-primary/15 pb-4">
+            <h2 className="font-display text-2xl md:text-3xl font-black uppercase text-primary tracking-tight leading-tight">
               CREATE YOUR BUILDER ID
-            </h1>
-            <p className="font-body text-body-lg text-on-surface-variant">
-              Turn your photo into your HH Goa 2026 Builder ID in seconds.
+            </h2>
+            <p className="font-body text-sm text-on-surface-variant mt-1">
+              Upload your photo, generate an AI title, and frame yourself in Goa 2026.
             </p>
           </div>
 
-          <div className="flex flex-col gap-6">
-            {/* 1 — Photo */}
+          <div className="flex flex-col gap-5">
+            {/* 1 — Photo Upload */}
             <PhotoUpload onPhoto={setPhoto} preview={photo || undefined} />
 
             {/* 2 — Details */}
             <div className="flex flex-col gap-4">
-              <h3 className="font-label text-label-caps text-primary uppercase tracking-widest border-b border-primary/20 pb-2">
-                Your Details
+              <h3 className="font-label text-xs text-primary font-black uppercase tracking-widest border-b border-primary/10 pb-1.5 flex items-center gap-1.5">
+                <span>📍</span>
+                <span>Your Details</span>
               </h3>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="name"
-                  className="font-label text-label-caps text-on-surface-variant uppercase tracking-widest"
+                  className="font-label text-xs text-primary/80 uppercase tracking-widest font-bold"
                 >
                   Name
                 </label>
                 <input
                   id="name"
                   type="text"
-                  placeholder="Your full name"
-                  className="bg-paper-white border border-primary/20 rounded px-4 py-3 font-body text-on-surface focus:border-primary focus:ring-0 outline-none transition-colors"
+                  placeholder="e.g. Satoshi Nakamoto"
+                  className="bg-paper-white border-2 border-primary/20 rounded-xl px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary focus:ring-0 outline-none transition-colors"
                   {...register("name")}
                 />
                 {errors.name && (
-                  <p className="font-label text-label-caps text-error text-xs uppercase tracking-widest">
+                  <p className="font-label text-error text-xs uppercase tracking-widest">
                     {errors.name.message}
                   </p>
                 )}
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="role"
-                  className="font-label text-label-caps text-on-surface-variant uppercase tracking-widest"
+                  className="font-label text-xs text-primary/80 uppercase tracking-widest font-bold"
                 >
                   Role
                 </label>
                 <input
                   id="role"
                   type="text"
-                  placeholder="e.g. Full-Stack Developer"
-                  className="bg-paper-white border border-primary/20 rounded px-4 py-3 font-body text-on-surface focus:border-primary focus:ring-0 outline-none transition-colors"
+                  placeholder="e.g. Full-Stack Dev / AI Researcher"
+                  className="bg-paper-white border-2 border-primary/20 rounded-xl px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary focus:ring-0 outline-none transition-colors"
                   {...register("role")}
                 />
                 {errors.role && (
-                  <p className="font-label text-label-caps text-error text-xs uppercase tracking-widest">
+                  <p className="font-label text-error text-xs uppercase tracking-widest">
                     {errors.role.message}
                   </p>
                 )}
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="skills"
-                  className="font-label text-label-caps text-on-surface-variant uppercase tracking-widest"
+                  className="font-label text-xs text-primary/80 uppercase tracking-widest font-bold"
                 >
                   Top Skills{" "}
-                  <span className="normal-case font-body text-xs text-outline">
+                  <span className="normal-case font-body text-xs text-outline font-normal">
                     (optional, comma-separated)
                   </span>
                 </label>
                 <input
                   id="skills"
                   type="text"
-                  placeholder="React, TypeScript, AI/ML"
-                  className="bg-paper-white border border-primary/20 rounded px-4 py-3 font-body text-on-surface focus:border-primary focus:ring-0 outline-none transition-colors"
+                  placeholder="React, Next.js, Node.js"
+                  className="bg-paper-white border-2 border-primary/20 rounded-xl px-4 py-2.5 font-body text-sm text-on-surface focus:border-primary focus:ring-0 outline-none transition-colors"
                   {...register("skills")}
                 />
               </div>
             </div>
 
             {/* 3 — Builder Title */}
-            <div className="flex flex-col gap-2">
-              <label className="font-label text-label-caps text-primary uppercase tracking-widest">
-                Builder Title
+            <div className="flex flex-col gap-1.5">
+              <label className="font-label text-xs text-primary font-black uppercase tracking-widest flex items-center gap-1">
+                <span>★</span>
+                <span>Builder Title</span>
               </label>
               <div className="flex items-center gap-2">
-                <div className="flex-grow bg-paper-white border border-primary/20 rounded px-4 py-3 font-body italic text-stamp-red min-h-[48px] flex items-center">
+                <div className="flex-grow bg-paper-white border-2 border-primary/20 rounded-xl px-4 py-2.5 font-body italic text-stamp-red font-bold text-sm min-h-[46px] flex items-center truncate">
                   {builderTitle || (
-                    <span className="text-outline not-italic text-sm">
-                      Generate your builder title →
+                    <span className="text-outline not-italic text-xs font-normal">
+                      Click ↻ to generate your title →
                     </span>
                   )}
                 </div>
@@ -238,10 +236,10 @@ export default function GeneratorForm() {
                   onClick={generateTitle}
                   disabled={!name || !role || step === "generating-title"}
                   title="Generate builder title"
-                  className="bg-surface-container-high text-primary p-3 rounded border border-primary/20 hover:bg-primary-container hover:text-on-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
+                  className="bg-primary text-on-primary p-2.5 rounded-xl border border-primary hover:bg-primary-container transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center shadow-xs"
                 >
                   <span
-                    className={`material-symbols-outlined ${
+                    className={`material-symbols-outlined text-xl ${
                       step === "generating-title" ? "animate-spin" : ""
                     }`}
                   >
@@ -251,92 +249,102 @@ export default function GeneratorForm() {
               </div>
             </div>
 
-            {/* Error */}
+            {/* Error Message */}
             {error && (
-              <p className="font-label text-label-caps text-error uppercase tracking-widest text-sm">
+              <p className="font-label text-xs text-error font-bold uppercase tracking-widest bg-error-container/20 p-2.5 rounded-lg border border-error/30">
                 ⚠ {error}
               </p>
             )}
 
-            {/* CTA */}
+            {/* CTA / Generation Actions */}
             {step !== "done" ? (
               <button
                 type="button"
                 onClick={handleSubmit(onSubmit)}
                 disabled={step !== "idle"}
-                className="w-full bg-primary text-on-primary font-display text-headline-md py-4 rounded-full btn-shadow hover:-translate-y-0.5 transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-primary text-on-primary font-display text-base md:text-lg font-black py-4 px-6 rounded-full btn-shadow hover:-translate-y-0.5 active:translate-y-0 transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md uppercase tracking-wider mt-2"
               >
-                <span className="material-symbols-outlined">badge</span>
-                {step === "generating-card" ? "Generating…" : "Generate My ID Card"}
+                <span className="text-secondary text-xl">✨</span>
+                <span>{step === "generating-card" ? "Generating Builder ID…" : "Generate My ID Card"}</span>
               </button>
             ) : (
-              /* Post-generation actions */
-              <div className="flex flex-col gap-3">
-                <p className="font-label text-label-caps text-primary uppercase tracking-widest text-center">
-                  ✓ Your Builder ID is ready!
-                </p>
+              /* Post-generation actions with clean hierarchy */
+              <div className="flex flex-col gap-3 pt-2">
+                <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 text-center">
+                  <p className="font-display text-xs font-black text-primary uppercase tracking-widest">
+                    ✓ Your Builder ID is ready!
+                  </p>
+                </div>
 
+                {/* Primary CTA */}
                 <button
                   type="button"
                   onClick={download}
-                  className="w-full bg-primary text-on-primary font-body text-button-text py-3 rounded-full btn-shadow hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2"
+                  className="w-full bg-primary text-on-primary font-display text-base font-black py-3.5 rounded-full btn-shadow hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 shadow-md uppercase tracking-wider"
                 >
-                  <span className="material-symbols-outlined">download</span>
-                  Download PNG
+                  <span className="material-symbols-outlined text-xl">download</span>
+                  <span>Download PNG</span>
                 </button>
 
+                {/* Secondary / Social CTA */}
                 <a
                   href={xIntentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-secondary text-on-secondary font-body text-button-text py-3 rounded-full btn-shadow-secondary hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 text-center"
+                  className="w-full bg-secondary text-on-secondary font-display text-sm md:text-base font-black py-3.5 rounded-full btn-shadow-secondary hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 text-center uppercase tracking-wider shadow-sm"
                 >
-                  <span className="material-symbols-outlined">share</span>
-                  Share on X with #FrameInGoa
+                  <span className="material-symbols-outlined text-lg">share</span>
+                  <span>Share on X with #FrameInGoa</span>
                 </a>
 
+                {/* Tertiary Copy Caption */}
                 <button
                   type="button"
                   onClick={copyShareText}
-                  className="w-full bg-surface-container-high text-primary border border-primary/20 font-body text-button-text py-3 rounded-full hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-2 text-center"
+                  className="w-full bg-surface-container-high text-primary border-2 border-primary/20 font-body text-xs md:text-sm font-bold py-3 rounded-full hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-2 text-center"
                 >
-                  <span className="material-symbols-outlined">
+                  <span className="material-symbols-outlined text-lg">
                     {copied ? "check" : "content_copy"}
                   </span>
-                  {copied ? "✓ Copied Caption to Clipboard!" : "Copy Caption & Link"}
+                  <span>{copied ? "✓ Copied Caption to Clipboard!" : "Copy Caption & Link"}</span>
                 </button>
 
-                {cardUrl && (
-                  <a
-                    href={`/card/${encodeURIComponent(btoa(cardUrl))}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-label text-label-caps text-outline uppercase tracking-widest text-center text-xs hover:text-primary transition-colors mt-1"
+                <div className="flex items-center justify-between pt-2 px-1">
+                  {cardId && (
+                    <a
+                      href={`/card/${cardId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-label text-[11px] text-primary/80 uppercase tracking-widest hover:text-secondary font-bold transition-colors"
+                    >
+                      View public page →
+                    </a>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep("idle");
+                      setCardId("");
+                      setCardUrl("");
+                    }}
+                    className="font-label text-[11px] text-outline uppercase tracking-widest hover:text-primary font-bold transition-colors ml-auto"
                   >
-                    View public share page →
-                  </a>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStep("idle");
-                    setCardUrl("");
-                  }}
-                  className="font-label text-label-caps text-outline uppercase tracking-widest text-center text-xs hover:text-primary transition-colors"
-                >
-                  Make another card
-                </button>
+                    Make another card ↻
+                  </button>
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* ── Right: card preview (7 cols) ── */}
-        <div className="md:col-span-7 flex items-start justify-center pt-4 md:pt-0 md:sticky md:top-24">
-          <div className="w-full max-w-lg">
-            <CardPreview data={cardData} cardRef={cardRef} />
-          </div>
+        {/* ── Right: Large Builder Card Preview (7 cols / ~60%) ── */}
+        <div className="lg:col-span-7 flex flex-col items-center w-full lg:sticky lg:top-20">
+          <CardPreview
+            data={cardData}
+            cardRef={cardRef}
+            isGenerated={step === "done"}
+          />
         </div>
       </div>
     </section>
