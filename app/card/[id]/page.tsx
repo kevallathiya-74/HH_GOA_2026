@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { buildXIntent } from "@/lib/share";
+import { getBaseUrl } from "@/lib/url";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -22,6 +23,7 @@ function decodeId(id: string): string {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const imageUrl = decodeId(id);
+  const canonicalUrl = `${getBaseUrl()}/card/${id}`;
 
   return {
     title: "HH Goa 2026 Builder ID Card",
@@ -29,13 +31,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: "HH Goa 2026 Builder ID Card",
       description: "Check out my HH Goa 2026 Builder ID Card! #FrameInGoa",
-      images: [{ url: imageUrl, width: 1200, height: 900, alt: "HH Goa 2026 Builder ID Card" }],
+      url: canonicalUrl,
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 900,
+          alt: "HH Goa 2026 Builder ID Card",
+        },
+      ],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
       title: "HH Goa 2026 Builder ID Card",
-      description: "#FrameInGoa",
+      description: "Check out my HH Goa 2026 Builder ID Card! #FrameInGoa",
       images: [imageUrl],
     },
   };
@@ -44,6 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CardPage({ params }: Props) {
   const { id } = await params;
   const imageUrl = decodeId(id);
+  const cardPageUrl = `${getBaseUrl()}/card/${id}`;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-margin-mobile py-12 gap-8">
@@ -76,7 +87,7 @@ export default async function CardPage({ params }: Props) {
           Download
         </a>
         <a
-          href={buildXIntent(imageUrl, "Builder")}
+          href={buildXIntent(cardPageUrl)}
           target="_blank"
           rel="noopener noreferrer"
           className="flex-1 bg-secondary text-on-secondary font-body text-button-text py-3 rounded-full btn-shadow-secondary hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 text-center"

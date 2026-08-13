@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema, type FormValues } from "@/lib/validation";
 import { exportCard } from "@/lib/image";
 import { buildXIntent, getShareCaption } from "@/lib/share";
+import { getBaseUrl } from "@/lib/url";
 import PhotoUpload from "./PhotoUpload";
 import CardPreview from "@/components/card/CardPreview";
 import type { CardData } from "@/components/card/BuilderCard";
@@ -84,9 +85,12 @@ export default function GeneratorForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload failed");
+      
+      console.log("[generate] Card created successfully. Public URL:", data.url);
       setCardUrl(data.url);
       setStep("done");
     } catch (e) {
+      console.error("[generate] Error:", (e as Error).message);
       setError((e as Error).message);
       setStep("idle");
     }
@@ -102,13 +106,13 @@ export default function GeneratorForm() {
         a.click();
       })
       .catch((err) => {
-        console.error("Download export error:", err);
+        console.error("[download] Export error:", err);
       });
   };
 
   const getPublicShareUrl = () => {
-    if (!cardUrl) return typeof window !== "undefined" ? window.location.href : "";
-    return `${window.location.origin}/card/${encodeURIComponent(btoa(cardUrl))}`;
+    if (!cardUrl) return getBaseUrl();
+    return `${getBaseUrl()}/card/${encodeURIComponent(btoa(cardUrl))}`;
   };
 
   const copyShareText = async () => {
@@ -119,9 +123,12 @@ export default function GeneratorForm() {
       setCopied(true);
       setTimeout(() => setCopied(false), 3000);
     } catch (err) {
-      console.warn("Clipboard write failed:", err);
+      console.warn("[clipboard] Write failed:", err);
     }
   };
+
+  const publicShareUrl = getPublicShareUrl();
+  const xIntentUrl = buildXIntent(publicShareUrl);
 
   return (
     <section
@@ -137,7 +144,7 @@ export default function GeneratorForm() {
               CREATE YOUR BUILDER ID
             </h1>
             <p className="font-body text-body-lg text-on-surface-variant">
-              Turn your photo into your HH Goa 2026 Builder ID
+              Turn your photo into your HH Goa 2026 Builder ID in seconds.
             </p>
           </div>
 
@@ -279,7 +286,7 @@ export default function GeneratorForm() {
                 </button>
 
                 <a
-                  href={buildXIntent(getPublicShareUrl(), name)}
+                  href={xIntentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-secondary text-on-secondary font-body text-button-text py-3 rounded-full btn-shadow-secondary hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 text-center"

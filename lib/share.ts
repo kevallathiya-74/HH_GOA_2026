@@ -1,12 +1,12 @@
-export function buildXIntent(sharePageUrl: string, name?: string): string {
+export function buildXIntent(publicCardUrl: string): string {
   const params = new URLSearchParams({
-    text: "Just generated my HH Goa 2026 Builder ID! 🌴",
-    url: sharePageUrl,
-    hashtags: "FrameInGoa,HackerHouseGoa",
+    text: `Just generated my HH Goa 2026 Builder ID! 🌴\n\nCreate yours and join the builders.\n\n#FrameInGoa`,
+    url: publicCardUrl,
   });
+
   return `https://x.com/intent/tweet?${params.toString()}`;
 }
 
-export function getShareCaption(sharePageUrl: string): string {
-  return `Just generated my HH Goa 2026 Builder ID! 🌴\n\n#FrameInGoa #HackerHouseGoa\n\n${sharePageUrl}`;
+export function getShareCaption(publicCardUrl: string): string {
+  return `Just generated my HH Goa 2026 Builder ID! 🌴\n\nCreate yours and join the builders.\n\n#FrameInGoa\n\n${publicCardUrl}`;
 }
