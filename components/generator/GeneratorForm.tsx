@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema, type FormValues } from "@/lib/validation";
 import { exportCard } from "@/lib/image";
-import { buildXIntent } from "@/lib/share";
+import { buildXIntent, getShareCaption } from "@/lib/share";
 import PhotoUpload from "./PhotoUpload";
 import CardPreview from "@/components/card/CardPreview";
 import type { CardData } from "@/components/card/BuilderCard";
@@ -18,6 +18,7 @@ export default function GeneratorForm() {
   const [builderTitle, setBuilderTitle] = useState("");
   const [step, setStep] = useState<Step>("idle");
   const [cardUrl, setCardUrl] = useState("");
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
 
   const {
@@ -60,8 +61,14 @@ export default function GeneratorForm() {
   }, [name, role, skills]);
 
   const onSubmit = async () => {
-    if (!photo) { setError("Please upload a photo first."); return; }
-    if (!builderTitle) { setError("Please generate your builder title first."); return; }
+    if (!photo) {
+      setError("Please upload a photo first.");
+      return;
+    }
+    if (!builderTitle) {
+      setError("Please generate your builder title first.");
+      return;
+    }
     setError("");
     setStep("generating-card");
 
@@ -87,18 +94,41 @@ export default function GeneratorForm() {
 
   const download = () => {
     if (!cardRef.current) return;
-    exportCard(cardRef.current).then((dataUrl) => {
-      const a = document.createElement("a");
-      a.download = `hh-goa-builder-id-${Date.now()}.png`;
-      a.href = dataUrl;
-      a.click();
-    });
+    exportCard(cardRef.current)
+      .then((dataUrl) => {
+        const a = document.createElement("a");
+        a.download = `hh-goa-builder-id-${Date.now()}.png`;
+        a.href = dataUrl;
+        a.click();
+      })
+      .catch((err) => {
+        console.error("Download export error:", err);
+      });
+  };
+
+  const getPublicShareUrl = () => {
+    if (!cardUrl) return typeof window !== "undefined" ? window.location.href : "";
+    return `${window.location.origin}/card/${encodeURIComponent(btoa(cardUrl))}`;
+  };
+
+  const copyShareText = async () => {
+    const shareUrl = getPublicShareUrl();
+    const caption = getShareCaption(shareUrl);
+    try {
+      await navigator.clipboard.writeText(caption);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch (err) {
+      console.warn("Clipboard write failed:", err);
+    }
   };
 
   return (
-    <section id="generate" className="w-full px-margin-mobile md:px-margin-desktop py-8 md:py-12 max-w-container-max mx-auto">
+    <section
+      id="generate"
+      className="w-full px-margin-mobile md:px-margin-desktop py-8 md:py-12 max-w-container-max mx-auto"
+    >
       <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter items-start">
-
         {/* ── Left: form panel (5 cols) ── */}
         <div className="md:col-span-5 flex flex-col gap-8">
           {/* Header */}
@@ -107,16 +137,13 @@ export default function GeneratorForm() {
               CREATE YOUR BUILDER ID
             </h1>
             <p className="font-body text-body-lg text-on-surface-variant">
-              Turn your photo into your HH Goa 2026 Builder ID in seconds.
+              Turn your photo into your HH Goa 2026 Builder ID
             </p>
           </div>
 
           <div className="flex flex-col gap-6">
             {/* 1 — Photo */}
-            <PhotoUpload
-              onPhoto={setPhoto}
-              preview={photo || undefined}
-            />
+            <PhotoUpload onPhoto={setPhoto} preview={photo || undefined} />
 
             {/* 2 — Details */}
             <div className="flex flex-col gap-4">
@@ -172,7 +199,9 @@ export default function GeneratorForm() {
                   className="font-label text-label-caps text-on-surface-variant uppercase tracking-widest"
                 >
                   Top Skills{" "}
-                  <span className="normal-case font-body text-xs text-outline">(optional, comma-separated)</span>
+                  <span className="normal-case font-body text-xs text-outline">
+                    (optional, comma-separated)
+                  </span>
                 </label>
                 <input
                   id="skills"
@@ -205,7 +234,9 @@ export default function GeneratorForm() {
                   className="bg-surface-container-high text-primary p-3 rounded border border-primary/20 hover:bg-primary-container hover:text-on-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
                 >
                   <span
-                    className={`material-symbols-outlined ${step === "generating-title" ? "animate-spin" : ""}`}
+                    className={`material-symbols-outlined ${
+                      step === "generating-title" ? "animate-spin" : ""
+                    }`}
                   >
                     autorenew
                   </span>
@@ -237,15 +268,18 @@ export default function GeneratorForm() {
                 <p className="font-label text-label-caps text-primary uppercase tracking-widest text-center">
                   ✓ Your Builder ID is ready!
                 </p>
+
                 <button
+                  type="button"
                   onClick={download}
                   className="w-full bg-primary text-on-primary font-body text-button-text py-3 rounded-full btn-shadow hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2"
                 >
                   <span className="material-symbols-outlined">download</span>
                   Download PNG
                 </button>
+
                 <a
-                  href={buildXIntent(cardUrl || window.location.href, name)}
+                  href={buildXIntent(getPublicShareUrl(), name)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-secondary text-on-secondary font-body text-button-text py-3 rounded-full btn-shadow-secondary hover:-translate-y-0.5 transition-transform flex items-center justify-center gap-2 text-center"
@@ -253,21 +287,38 @@ export default function GeneratorForm() {
                   <span className="material-symbols-outlined">share</span>
                   Share on X with #FrameInGoa
                 </a>
+
+                <button
+                  type="button"
+                  onClick={copyShareText}
+                  className="w-full bg-surface-container-high text-primary border border-primary/20 font-body text-button-text py-3 rounded-full hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-2 text-center"
+                >
+                  <span className="material-symbols-outlined">
+                    {copied ? "check" : "content_copy"}
+                  </span>
+                  {copied ? "✓ Copied Caption to Clipboard!" : "Copy Caption & Link"}
+                </button>
+
                 {cardUrl && (
                   <a
                     href={`/card/${encodeURIComponent(btoa(cardUrl))}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-label text-label-caps text-outline uppercase tracking-widest text-center text-xs hover:text-primary transition-colors"
+                    className="font-label text-label-caps text-outline uppercase tracking-widest text-center text-xs hover:text-primary transition-colors mt-1"
                   >
                     View public share page →
                   </a>
                 )}
+
                 <button
-                  onClick={() => { setStep("idle"); setCardUrl(""); }}
+                  type="button"
+                  onClick={() => {
+                    setStep("idle");
+                    setCardUrl("");
+                  }}
                   className="font-label text-label-caps text-outline uppercase tracking-widest text-center text-xs hover:text-primary transition-colors"
                 >
-                  Make another
+                  Make another card
                 </button>
               </div>
             )}

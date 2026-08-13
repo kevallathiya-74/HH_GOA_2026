@@ -8,13 +8,18 @@ export default function Nav() {
 
   return (
     <nav className="bg-background sticky top-0 z-50 border-b border-primary/20">
-      <div className="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 max-w-container-max mx-auto">
-        {/* Brand */}
-        <Link
-          href="/"
-          className="font-display text-display-lg-mobile tracking-tighter uppercase text-primary"
-        >
-          Hacker House Goa
+      <div className="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-3.5 max-w-container-max mx-auto">
+        {/* Brand with Logo */}
+        <Link href="/" className="flex items-center gap-3 group">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.jpg"
+            alt="HH Goa Logo"
+            className="w-10 h-10 rounded-full object-cover border-2 border-primary/30 shadow-sm group-hover:scale-105 transition-transform"
+          />
+          <span className="font-display text-xl md:text-2xl font-extrabold tracking-tight uppercase text-primary">
+            Hacker House Goa
+          </span>
         </Link>
 
         {/* Desktop nav */}
