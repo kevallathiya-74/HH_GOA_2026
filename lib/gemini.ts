@@ -8,7 +8,7 @@ export async function generateBuilderTitle(
   role: string,
   skills?: string
 ): Promise<string> {
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
 
   const prompt = `You are a creative title generator for a tech hackathon.
 Generate a short, punchy builder title (2-5 words, ALL CAPS) for:

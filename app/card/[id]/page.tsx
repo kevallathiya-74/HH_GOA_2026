@@ -9,9 +9,13 @@ interface Props {
 // Decode blob URL from base64 id param
 function decodeId(id: string): string {
   try {
-    return atob(decodeURIComponent(id));
+    const decoded = atob(decodeURIComponent(id));
+    if (decoded.startsWith("http") || decoded.startsWith("data:")) {
+      return decoded;
+    }
+    return decodeURIComponent(id);
   } catch {
-    return id;
+    return decodeURIComponent(id);
   }
 }
 
@@ -47,7 +51,10 @@ export default async function CardPage({ params }: Props) {
         HH Goa 2026 Builder ID
       </h1>
 
-      <div className="w-full max-w-xl card-ambient-shadow rounded-2xl overflow-hidden" style={{ border: "10px solid #003527" }}>
+      <div
+        className="w-full max-w-xl card-ambient-shadow rounded-2xl overflow-hidden bg-paper-white"
+        style={{ border: "10px solid #003527" }}
+      >
         <Image
           src={imageUrl}
           alt="HH Goa 2026 Builder ID Card"
@@ -55,6 +62,7 @@ export default async function CardPage({ params }: Props) {
           height={900}
           className="w-full h-auto"
           priority
+          unoptimized
         />
       </div>
 
@@ -80,7 +88,7 @@ export default async function CardPage({ params }: Props) {
 
       <a
         href="/"
-        className="font-label text-label-caps text-outline uppercase tracking-widest hover:text-primary transition-colors"
+        className="font-label text-label-caps text-outline uppercase tracking-widest hover:text-primary transition-colors text-xs"
       >
         ← Create your own
       </a>

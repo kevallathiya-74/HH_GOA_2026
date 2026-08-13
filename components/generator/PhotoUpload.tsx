@@ -7,43 +7,82 @@ interface Props {
   preview?: string;
 }
 
-const ACCEPTED = ["image/jpeg", "image/png", "image/heic", "image/heif"];
-const MAX_MB = 5;
+const MAX_MB = 10; // Allow up to 10MB photos from modern phone cameras
+
+function isHeicFile(file: File): boolean {
+  const name = file.name.toLowerCase();
+  const type = (file.type || "").toLowerCase();
+  return (
+    name.endsWith(".heic") ||
+    name.endsWith(".heif") ||
+    type.includes("heic") ||
+    type.includes("heif")
+  );
+}
+
+function isValidImageFile(file: File): boolean {
+  const name = file.name.toLowerCase();
+  const type = (file.type || "").toLowerCase();
+  const validExtensions = [".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp"];
+  return (
+    type.startsWith("image/") ||
+    validExtensions.some((ext) => name.endsWith(ext)) ||
+    isHeicFile(file)
+  );
+}
 
 export default function PhotoUpload({ onPhoto, preview }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const process = useCallback(
     async (file: File) => {
       setError(null);
 
-      if (!ACCEPTED.includes(file.type.toLowerCase())) {
-        setError("Please upload a JPG, PNG, or HEIC file.");
+      if (!isValidImageFile(file)) {
+        setError("Please upload a JPG, PNG, HEIC, or WebP photo.");
         return;
       }
       if (file.size > MAX_MB * 1024 * 1024) {
-        setError(`File must be under ${MAX_MB}MB.`);
+        setError(`File size must be under ${MAX_MB}MB.`);
         return;
       }
 
-      let src: Blob = file;
+      setLoading(true);
 
-      // HEIC → PNG conversion (client-side, lazy import)
-      if (file.type === "image/heic" || file.type === "image/heif") {
-        try {
-          const heic2any = (await import("heic2any")).default;
-          src = (await heic2any({ blob: file, toType: "image/png" })) as Blob;
-        } catch {
-          setError("Could not convert HEIC file. Try a JPG or PNG.");
-          return;
+      try {
+        let src: Blob = file;
+
+        // HEIC/HEIF conversion (iPhone / Android)
+        if (isHeicFile(file)) {
+          try {
+            const heic2any = (await import("heic2any")).default;
+            const result = await heic2any({ blob: file, toType: "image/png" });
+            src = Array.isArray(result) ? result[0] : result;
+          } catch (heicErr) {
+            console.warn("HEIC direct conversion note:", heicErr);
+            // Fallback to original blob if browser natively handles it
+            src = file;
+          }
         }
-      }
 
-      const reader = new FileReader();
-      reader.onload = (e) => onPhoto(e.target?.result as string);
-      reader.readAsDataURL(src);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          onPhoto(e.target?.result as string);
+          setLoading(false);
+        };
+        reader.onerror = () => {
+          setError("Failed to read image file. Please try another photo.");
+          setLoading(false);
+        };
+        reader.readAsDataURL(src);
+      } catch (err) {
+        console.error("Image processing error:", err);
+        setError("Failed to process photo. Please try another image.");
+        setLoading(false);
+      }
     },
     [onPhoto]
   );
@@ -79,11 +118,12 @@ export default function PhotoUpload({ onPhoto, preview }: Props) {
             className="w-full h-full object-cover"
           />
           <button
+            type="button"
             onClick={() => {
               onPhoto("");
               if (inputRef.current) inputRef.current.value = "";
             }}
-            className="absolute top-2 right-2 bg-primary text-on-primary rounded-full px-3 py-1 font-label text-label-caps uppercase tracking-widest text-xs hover:bg-primary-container transition-colors"
+            className="absolute top-2 right-2 bg-primary text-on-primary rounded-full px-3 py-1 font-label text-label-caps uppercase tracking-widest text-xs hover:bg-primary-container transition-colors shadow-sm"
           >
             Change
           </button>
@@ -101,11 +141,14 @@ export default function PhotoUpload({ onPhoto, preview }: Props) {
           }`}
           onClick={() => inputRef.current?.click()}
           onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
           onDragLeave={() => setDragOver(false)}
           onDrop={onDrop}
         >
-          {/* Stamp icon */}
+          {/* Upload icon */}
           <div
             className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 transition-colors ${
               dragOver
@@ -113,27 +156,29 @@ export default function PhotoUpload({ onPhoto, preview }: Props) {
                 : "bg-surface-container-highest text-primary"
             }`}
           >
-            <span className="material-symbols-outlined">upload_file</span>
+            <span className="material-symbols-outlined">
+              {loading ? "hourglass_top" : "upload_file"}
+            </span>
           </div>
           <span className="font-body text-button-text text-primary mb-1">
-            Click to upload or drag and drop
+            {loading ? "Processing photo…" : "Click to upload or drag and drop"}
           </span>
           <span className="font-body text-sm text-outline">
-            JPG, PNG, HEIC (max {MAX_MB}MB)
+            JPG, PNG, HEIC, WebP 
           </span>
         </div>
       )}
 
       {error && (
-        <p className="font-label text-label-caps text-error uppercase tracking-widest">
-          {error}
+        <p className="font-label text-label-caps text-error uppercase tracking-widest text-xs">
+          ⚠ {error}
         </p>
       )}
 
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/heic,image/heif"
+        accept="image/*,.heic,.heif,.HEIC,.HEIF"
         className="hidden"
         onChange={onInputChange}
         aria-hidden="true"

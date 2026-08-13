@@ -18,24 +18,60 @@ const StampCorner = ({ className }: { className?: string }) => (
     xmlns="http://www.w3.org/2000/svg"
     className={className}
   >
-    <rect x="1" y="1" width="30" height="30" rx="3" stroke="#003527" strokeWidth="1.5" strokeDasharray="3 2" fill="none" />
+    <rect
+      x="1"
+      y="1"
+      width="30"
+      height="30"
+      rx="3"
+      stroke="#003527"
+      strokeWidth="1.5"
+      strokeDasharray="3 2"
+      fill="none"
+    />
     <circle cx="16" cy="16" r="6" stroke="#003527" strokeWidth="1.2" fill="none" />
-    <path d="M16 10V8M16 24V22M10 16H8M24 16H22" stroke="#003527" strokeWidth="1.2" strokeLinecap="round" />
+    <path
+      d="M16 10V8M16 24V22M10 16H8M24 16H22"
+      stroke="#003527"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
 // Palm tree SVG accent
 const PalmAccent = ({ className }: { className?: string }) => (
-  <svg width="40" height="56" viewBox="0 0 40 56" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    <path d="M20 56V28" stroke="#003527" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M20 28C20 28 8 22 4 14C10 12 18 20 20 28Z" fill="#0b4d3b" opacity="0.7"/>
-    <path d="M20 28C20 28 32 22 36 14C30 12 22 20 20 28Z" fill="#0b4d3b" opacity="0.7"/>
-    <path d="M20 24C20 24 12 14 14 6C18 8 22 18 20 24Z" fill="#003527" opacity="0.6"/>
+  <svg
+    width="40"
+    height="56"
+    viewBox="0 0 40 56"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path d="M20 56V28" stroke="#003527" strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M20 28C20 28 8 22 4 14C10 12 18 20 20 28Z" fill="#0b4d3b" opacity="0.7" />
+    <path d="M20 28C20 28 32 22 36 14C30 12 22 20 20 28Z" fill="#0b4d3b" opacity="0.7" />
+    <path d="M20 24C20 24 12 14 14 6C18 8 22 18 20 24Z" fill="#003527" opacity="0.6" />
   </svg>
 );
 
-// Noise filter grain overlay as data-URI
-const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E")`;
+// Inline person avatar icon fallback
+const PersonIcon = () => (
+  <svg
+    width="48"
+    height="48"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="#707974"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
 
 interface Props {
   data: CardData;
@@ -44,7 +80,11 @@ interface Props {
 
 export default function BuilderCard({ data, cardRef }: Props) {
   const skills = data.skills
-    ? data.skills.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 5)
+    ? data.skills
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 5)
     : [];
 
   return (
@@ -57,13 +97,6 @@ export default function BuilderCard({ data, cardRef }: Props) {
         minHeight: 320,
       }}
     >
-      {/* Grain overlay */}
-      <div
-        aria-hidden
-        className="absolute inset-0 z-10 pointer-events-none"
-        style={{ backgroundImage: GRAIN_SVG, backgroundSize: "200px 200px" }}
-      />
-
       {/* Stamp corners */}
       <StampCorner className="absolute top-3 left-3 z-20 opacity-40" />
       <StampCorner className="absolute top-3 right-3 z-20 opacity-40 rotate-90" />
@@ -85,9 +118,7 @@ export default function BuilderCard({ data, cardRef }: Props) {
           />
         ) : (
           <div className="w-full h-full bg-surface-container-highest flex items-center justify-center">
-            <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: 48 }}>
-              person
-            </span>
+            <PersonIcon />
           </div>
         )}
         {/* Vertical dotted divider */}
@@ -101,14 +132,21 @@ export default function BuilderCard({ data, cardRef }: Props) {
       <div className="relative z-10 flex flex-col justify-between p-5 flex-1 overflow-hidden">
         {/* Header */}
         <div>
-          <p className="font-label text-label-caps text-primary uppercase tracking-widest mb-1" style={{ fontSize: 10 }}>
+          <p
+            className="font-label text-label-caps text-primary uppercase tracking-widest mb-1"
+            style={{ fontSize: 10 }}
+          >
             HH GOA 2026 · BUILDER ID
           </p>
 
           {/* Name */}
           <h2
             className="font-display text-primary leading-tight mb-1"
-            style={{ fontSize: "clamp(18px, 3.5vw, 28px)", fontWeight: 800, letterSpacing: "-0.02em" }}
+            style={{
+              fontSize: "clamp(18px, 3.5vw, 28px)",
+              fontWeight: 800,
+              letterSpacing: "-0.02em",
+            }}
           >
             {data.name || "YOUR NAME"}
           </h2>
@@ -117,7 +155,11 @@ export default function BuilderCard({ data, cardRef }: Props) {
           {data.title && (
             <p
               className="font-body italic mb-2"
-              style={{ color: "#E94F72", fontSize: "clamp(11px, 1.8vw, 14px)", fontWeight: 600 }}
+              style={{
+                color: "#E94F72",
+                fontSize: "clamp(11px, 1.8vw, 14px)",
+                fontWeight: 600,
+              }}
             >
               {data.title}
             </p>
@@ -182,7 +224,9 @@ export default function BuilderCard({ data, cardRef }: Props) {
               padding: "4px",
             }}
           >
-            HH<br />GOA
+            HH
+            <br />
+            GOA
           </div>
         </div>
       </div>
