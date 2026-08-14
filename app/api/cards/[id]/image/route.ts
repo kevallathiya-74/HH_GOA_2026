@@ -14,28 +14,40 @@ export async function GET(
     }
 
     const token = process.env.BLOB_READ_WRITE_TOKEN;
-    const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.png$/, "");
+    const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.[a-zA-Z0-9]+$/i, "");
     const pathname = `cards/${cleanId}.png`;
 
     if (token) {
-      // 1. Try direct get() with private access (returns stream)
+      // 1. Primary: Search blob by prefix to detect exact format & content-type
       try {
-        const result = await get(pathname, { token, access: "private" });
-        if (result && result.stream) {
-          return new NextResponse(result.stream as unknown as BodyInit, {
-            status: 200,
-            headers: {
-              "Content-Type": "image/png",
-              "Cache-Control": "public, max-age=31536000, immutable",
-              "Access-Control-Allow-Origin": "*",
-            },
+        const { blobs } = await list({
+          prefix: `cards/${cleanId}`,
+          token,
+          limit: 1,
+        });
+
+        if (blobs.length > 0) {
+          const targetBlob = blobs[0];
+          const res = await fetch(targetBlob.url, {
+            headers: { Authorization: `Bearer ${token}` },
           });
+          if (res.ok && res.body) {
+            const contentType = res.headers.get("content-type") || "image/png";
+            return new NextResponse(res.body as unknown as BodyInit, {
+              status: 200,
+              headers: {
+                "Content-Type": contentType,
+                "Cache-Control": "public, max-age=31536000, immutable",
+                "Access-Control-Allow-Origin": "*",
+              },
+            });
+          }
         }
-      } catch (getErr) {
-        console.warn("[image-route] get private error:", getErr);
+      } catch (listErr) {
+        console.error("[image-route] list query error:", listErr);
       }
 
-      // 2. Try get() with public access
+      // 2. Direct get() fallback
       try {
         const result = await get(pathname, { token, access: "public" });
         if (result && result.stream) {
@@ -50,33 +62,6 @@ export async function GET(
         }
       } catch (getErr) {
         console.warn("[image-route] get public error:", getErr);
-      }
-
-      // 3. Fallback: Search blob by prefix and fetch stream
-      try {
-        const { blobs } = await list({
-          prefix: `cards/${cleanId}`,
-          token,
-          limit: 1,
-        });
-
-        if (blobs.length > 0) {
-          const res = await fetch(blobs[0].url, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok && res.body) {
-            return new NextResponse(res.body as unknown as BodyInit, {
-              status: 200,
-              headers: {
-                "Content-Type": "image/png",
-                "Cache-Control": "public, max-age=31536000, immutable",
-                "Access-Control-Allow-Origin": "*",
-              },
-            });
-          }
-        }
-      } catch (listErr) {
-        console.error("[image-route] list query error:", listErr);
       }
     }
 

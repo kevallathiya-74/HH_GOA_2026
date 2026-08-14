@@ -5,7 +5,10 @@ export async function uploadCard(
   dataUrl: string,
   filename: string
 ): Promise<{ url: string; pathname: string }> {
-  // dataUrl → Buffer
+  // Extract contentType dynamically from dataUrl (supports png, jpeg, webp, gif, svg, etc.)
+  const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9\+\-\.]+);base64,/);
+  const contentType = match ? match[1] : "image/png";
+  const ext = contentType.split("/")[1]?.replace("+xml", "") || "png";
   const base64 = dataUrl.replace(/^data:image\/\w+;base64,/, "");
   const buffer = Buffer.from(base64, "base64");
 
@@ -18,9 +21,9 @@ export async function uploadCard(
 
   try {
     // Try public access first
-    const blob = await put(`cards/${filename}.png`, buffer, {
+    const blob = await put(`cards/${filename}.${ext}`, buffer, {
       access: "public",
-      contentType: "image/png",
+      contentType,
       token,
     });
     return { url: blob.url, pathname: blob.pathname };
@@ -33,9 +36,9 @@ export async function uploadCard(
       errorMsg.includes("private access") ||
       errorMsg.includes("Cannot use public access")
     ) {
-      const privateBlob = await put(`cards/${filename}.png`, buffer, {
+      const privateBlob = await put(`cards/${filename}.${ext}`, buffer, {
         access: "private",
-        contentType: "image/png",
+        contentType,
         token,
       });
       return {
@@ -54,7 +57,7 @@ export async function getCardBlobUrl(id: string): Promise<string | null> {
   if (!token) return null;
 
   try {
-    const cleanId = id.replace(/^cards\//, "").replace(/\.png$/, "");
+    const cleanId = id.replace(/^cards\//, "").replace(/\.[a-zA-Z0-9]+$/i, "");
     const { blobs } = await list({
       prefix: `cards/${cleanId}`,
       token,

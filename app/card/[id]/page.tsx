@@ -8,7 +8,7 @@ interface Props {
 }
 
 async function resolveCardImageUrl(id: string): Promise<string> {
-  const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.png$/, "");
+  const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.[a-zA-Z0-9]+$/i, "");
   const blobUrl = await getCardBlobUrl(cleanId);
   if (blobUrl) return blobUrl;
   return `${getBaseUrl()}/api/cards/${cleanId}/image`;
@@ -16,7 +16,7 @@ async function resolveCardImageUrl(id: string): Promise<string> {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.png$/, "");
+  const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.[a-zA-Z0-9]+$/i, "");
   const imageUrl = await resolveCardImageUrl(cleanId);
   const canonicalUrl = `${getBaseUrl()}/card/${cleanId}`;
 
@@ -48,7 +48,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         {
           url: imageUrl,
           width: 1200,
-          height: 857,
+          height: 630,
+          type: "image/png",
           alt: `HH Goa 2026 Builder ID — ${displayName}`,
         },
       ],
@@ -58,19 +59,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [
-        {
-          url: imageUrl,
-          alt: `HH Goa 2026 Builder ID — ${displayName}`,
-        },
-      ],
+      images: [imageUrl],
     },
   };
 }
 
 export default async function CardPage({ params }: Props) {
   const { id } = await params;
-  const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.png$/, "");
+  const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.[a-zA-Z0-9]+$/i, "");
   const imageUrl = await resolveCardImageUrl(cleanId);
   const cardPageUrl = `${getBaseUrl()}/card/${cleanId}`;
 

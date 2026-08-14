@@ -23,7 +23,7 @@ function isHeicFile(file: File): boolean {
 function isValidImageFile(file: File): boolean {
   const name = file.name.toLowerCase();
   const type = (file.type || "").toLowerCase();
-  const validExtensions = [".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp"];
+  const validExtensions = [".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp", ".gif", ".svg", ".avif", ".bmp"];
   return (
     type.startsWith("image/") ||
     validExtensions.some((ext) => name.endsWith(ext)) ||
