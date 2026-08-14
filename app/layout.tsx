@@ -3,8 +3,10 @@ import "./globals.css";
 import Nav from "@/components/ui/Nav";
 import Footer from "@/components/ui/Footer";
 import { Analytics } from "@vercel/analytics/next";
+import { getBaseUrl } from "@/lib/url";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getBaseUrl()),
   title: "HH Goa 2026 — Builder ID Card Generator",
   description:
     "Create your official Hacker House Goa 2026 Builder ID Card. Upload your photo, personalize, and share with #FrameInGoa.",

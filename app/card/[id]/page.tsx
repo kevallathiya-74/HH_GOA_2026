@@ -1,20 +1,23 @@
 import type { Metadata } from "next";
 import { buildXIntent } from "@/lib/share";
 import { getBaseUrl } from "@/lib/url";
+import { getCardBlobUrl } from "@/lib/blob";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-function getCardImageUrl(id: string): string {
+async function resolveCardImageUrl(id: string): Promise<string> {
   const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.png$/, "");
+  const blobUrl = await getCardBlobUrl(cleanId);
+  if (blobUrl) return blobUrl;
   return `${getBaseUrl()}/api/cards/${cleanId}/image`;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.png$/, "");
-  const imageUrl = getCardImageUrl(cleanId);
+  const imageUrl = await resolveCardImageUrl(cleanId);
   const canonicalUrl = `${getBaseUrl()}/card/${cleanId}`;
 
   const rawName = cleanId
@@ -33,12 +36,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = `HH Goa 2026 Builder ID for ${displayName}. Built in Goa for the world. #FrameInGoa`;
 
   return {
+    metadataBase: new URL(getBaseUrl()),
     title,
     description,
     openGraph: {
       title,
       description,
       url: canonicalUrl,
+      siteName: "HH Goa 2026",
       images: [
         {
           url: imageUrl,
@@ -53,7 +58,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [imageUrl],
+      images: [
+        {
+          url: imageUrl,
+          alt: `HH Goa 2026 Builder ID — ${displayName}`,
+        },
+      ],
     },
   };
 }
@@ -61,7 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CardPage({ params }: Props) {
   const { id } = await params;
   const cleanId = decodeURIComponent(id).replace(/^cards\//, "").replace(/\.png$/, "");
-  const imageUrl = getCardImageUrl(cleanId);
+  const imageUrl = await resolveCardImageUrl(cleanId);
   const cardPageUrl = `${getBaseUrl()}/card/${cleanId}`;
 
   return (

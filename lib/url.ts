@@ -16,5 +16,5 @@ export function getBaseUrl(): string {
   ) {
     return window.location.origin;
   }
-  return "https://hh-goa-2026-Nexus.vercel.app";
+  return "https://hh-goa-2026-nexus.vercel.app";
 }
